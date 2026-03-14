@@ -27,7 +27,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     const router = useRouter();
 
     useEffect(() => {
-        debugger;
         const usuarioRecover = Cookies.get('usuario');
         const tokenRecover = Cookies.get('token');
 

@@ -12,18 +12,17 @@ export default function SistemaLayout({
 }: {
   children: React.ReactNode
 }) {
-  const { usuario } = useAuth();
-  const router = useRouter();
+  // const { usuario } = useAuth();
+  // const router = useRouter();
 
   // useEffect(() => {
-  //   debugger;
   //   if (usuario == null) {
 
   //     router.push("/login")
   //   }
-  // })
+  // },[])
 
-  if (usuario == null) return null;
+  // if (usuario == null) return null;
 
   return (
     <div className="flex min-h-screen bg-zinc-950 text-zinc-100">
