@@ -31,9 +31,8 @@ export default function EditarUsuario(){
 
     return(
         <div className="">
-            <Link href="/usuarios">Voltar</Link>
-
             <div className="">
+                <Link href="/usuarios">Voltar</Link>
                 <h1 className="">{`Editar Usuário #${codigo}`}</h1>
             </div>
 
