@@ -1,11 +1,8 @@
 'use client'
 
-import { useRouter } from "next/navigation";
 import Footer from "../components/Footer"
 import Header from "../components/Header"
 import Sidebar from "../components/Sidebar"
-import { useAuth } from "../context/AuthContext";
-import { useEffect } from "react";
 
 export default function SistemaLayout({
   children,
