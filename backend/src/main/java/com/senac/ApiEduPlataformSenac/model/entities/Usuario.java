@@ -7,20 +7,27 @@ import jakarta.persistence.*;
 @Table(name = "usuario")
 public class Usuario {
 
-    public EnumStatusUsuario getStatus() {
-        return status;
+
+    public Usuario(){}
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+
+    private String nome;
+
+    private String email;
+
+    private String senha;
+
+    private EnumStatusUsuario status = EnumStatusUsuario.ATIVO;
+
+    public Long getId() {
+        return id;
     }
 
-    public void setStatus(EnumStatusUsuario status) {
-        this.status = status;
-    }
-
-    public String getSenha() {
-        return senha;
-    }
-
-    public void setSenha(String senha) {
-        this.senha = senha;
+    public void setId(Long id) {
+        this.id = id;
     }
 
     public String getNome() {
@@ -31,21 +38,27 @@ public class Usuario {
         this.nome = nome;
     }
 
-    public Long getId() {
-        return id;
+    public String getEmail() {
+        return email;
     }
 
-    public void setId(Long id) {
-        this.id = id;
+    public void setEmail(String email) {
+        this.email = email;
     }
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    public String getSenha() {
+        return senha;
+    }
 
-    private String nome;
+    public void setSenha(String senha) {
+        this.senha = senha;
+    }
 
-    private String senha;
+    public EnumStatusUsuario getStatus() {
+        return status;
+    }
 
-    private EnumStatusUsuario status = EnumStatusUsuario.ATIVO;
+    public void setStatus(EnumStatusUsuario status) {
+        this.status = status;
+    }
 }
