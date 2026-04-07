@@ -1,5 +1,5 @@
 'use client'
-import { createContext, ReactNode, useContext, useEffect, useState } from "react";
+import { createContext, ReactNode, use, useContext, useEffect, useState } from "react";
 import Cookies from "js-cookie";
 import { useRouter } from "next/navigation";
 
@@ -8,61 +8,58 @@ export class Usuario {
         public id: number,
         public nome: string,
         public email: string,
-        public senha: string,
         public status: string
     ) { }
 }
-
 interface AuthContextType {
     usuario: Usuario | null,
-    token: string | null,
     login: (usuario: Usuario, token: string) => void,
-    logout: () => void
+    logout: () => void,
+    loading: boolean
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export function AuthProvider({ children }: { children: ReactNode }) {
     const [usuario, setUsuario] = useState<Usuario | null>(null);
-    const [token, setToken] = useState<string | null>(null);
-    const router = useRouter();
+    const [loading, setLoading] = useState(true);
 
+    const router = useRouter();
     useEffect(() => {
         const usuarioRecover = Cookies.get('usuario');
-        const tokenRecover = Cookies.get('token');
-
-        if (usuarioRecover && tokenRecover) {
+        if (usuarioRecover) {
             try {
-                setUsuario(JSON.parse(usuarioRecover));
-                setToken(tokenRecover);
-                
-                router.push(window.location.pathname)
+                const jsonUsuario = JSON.parse(usuarioRecover);
+                const usuario = new Usuario(
+                    jsonUsuario.id,
+                    jsonUsuario.nome,
+                    jsonUsuario.email,
+                    jsonUsuario.status
+                );
+                setUsuario(usuario);
             } catch (e) {
                 console.error(e);
             }
         }
-
+        setLoading(false);
     }, []);
 
     const login = (usuario: Usuario, token: string) => {
-        debugger;
         setUsuario(usuario);
-        setToken(token);
         Cookies.set('usuario', JSON.stringify(usuario), { expires: 7 });
-        Cookies.set('token', token, { expires: 7, secure: true })
-
+        Cookies.set('token', token, { expires: 7 });
     }
-
+    
     const logout = () => {
+        console.log("Logout iniciado");
         setUsuario(null);
-        setToken(null);
         Cookies.remove('usuario');
         Cookies.remove('token');
-
+        router.push("/login");
     }
-
+    
     return (
-        <AuthContext.Provider value={{ usuario, token, login, logout }}>
+        <AuthContext.Provider value={{ usuario, loading, login, logout }}>
             {children}
         </AuthContext.Provider>
     )

@@ -1,25 +1,27 @@
 'use client'
 
+import { useEffect } from "react"
 import Footer from "../components/Footer"
 import Header from "../components/Header"
 import Sidebar from "../components/Sidebar"
+import { useAuth } from "../context/AuthContext"
+import { useRouter } from "next/navigation"
 
 export default function SistemaLayout({
   children,
 }: {
   children: React.ReactNode
 }) {
-  // const { usuario } = useAuth();
-  // const router = useRouter();
+  const { usuario, loading } = useAuth();
+  const router = useRouter();
 
-  // useEffect(() => {
-  //   if (usuario == null) {
+  useEffect(() => {
+    if (!loading && !usuario) {
+      router.push("/login")
+    }
+  },[loading, usuario])
 
-  //     router.push("/login")
-  //   }
-  // },[])
-
-  // if (usuario == null) return null;
+  if (loading || !usuario) return null;
 
   return (
     <div className="flex min-h-screen bg-zinc-950 text-zinc-100">

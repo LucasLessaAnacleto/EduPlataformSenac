@@ -1,4 +1,10 @@
+'use client'
+
+import { useAuth } from "../context/AuthContext";
+
 export default function Sidebar() {
+    const { logout } = useAuth();
+
     return (
         <aside className="
             w-64
@@ -146,6 +152,7 @@ export default function Sidebar() {
                         hover:text-red-400
                         transition
                     "
+                    onClick={() => logout()}
                 >
                     🚪 Sair
                 </button>

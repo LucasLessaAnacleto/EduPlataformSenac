@@ -1,8 +1,58 @@
+'use client'
+import { useState } from "react";
+import { useRouter } from "next/navigation";
 import Logo from "../components/Logo";
+import { useAuth, Usuario } from "../context/AuthContext";
+import axios from "axios";
+
+interface LoginResponse{
+    token: string;
+}
 
 export default function LoginPage() {
+    const { login } = useAuth();
+    const [email, setEmail] = useState("");
+    const [senha, setSenha] = useState("");
+    const router = useRouter();
+
+     async function handleLogin(formData: FormData) {
+        const email = formData.get("email")?.toString();
+        const senha = formData.get("senha")?.toString();
+
+        if (!email || !senha) {
+            alert("Preencha todos os campos!");
+            return;
+        }
+
+        try {
+            const response = await axios.post<LoginResponse>(
+                "http://localhost:8080/auth/login",
+                { email, senha }
+            );
+
+            if (response.status !== 200) {
+                alert("Usuário ou senha inválido!");
+                return;
+            }
+
+            const usuarioMock = new Usuario(
+                1,
+                "Professor Lucas Lessa",
+                email,
+                "ATIVO"
+            );
+
+            login(usuarioMock, response.data.token);
+
+            router.push("/home");
+
+        } catch (error) {
+            console.error(error);
+            alert("Erro ao entrar no sistema!");
+        }
+    }
     return (
-        <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-zinc-950 via-zinc-900 to-black text-zinc-100">
+        <div className="min-h-screen flex items-center justify-center bg-linear-to-br from-zinc-950 via-zinc-900 to-black text-zinc-100">
 
             <div className="w-full max-w-md bg-zinc-900/70 backdrop-blur border border-zinc-800 rounded-2xl shadow-2xl p-8">
                 <Logo />
@@ -37,6 +87,7 @@ export default function LoginPage() {
                                 focus:ring-blue-500/30
                                 transition
                             "
+                            onChange={e => setEmail(e.target.value)}
                         />
                     </div>
 
@@ -60,6 +111,7 @@ export default function LoginPage() {
                                 focus:ring-blue-500/30
                                 transition
                             "
+                            onChange={e => setSenha(e.target.value)}
                         />
                     </div>
 
@@ -78,6 +130,7 @@ export default function LoginPage() {
                             shadow-lg
                             shadow-blue-600/20
                         "
+                        onClick={handleLogin}
                     >
                         Acessar
                     </button>

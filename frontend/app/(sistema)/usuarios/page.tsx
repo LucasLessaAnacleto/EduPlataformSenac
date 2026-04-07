@@ -15,7 +15,8 @@ export default function UsuariosPage() {
 
     const carregarDados = async () => {
         try {
-            const dados = await UsuarioMock.listarTodos();
+            const response = await fetch("http://localhost:8080/usuarios");
+            const dados = await response.json();
             setUsuarios(dados);
         } catch (error) {
             console.error(error)

@@ -1,4 +1,8 @@
+'use client'
+import { useAuth } from "../context/AuthContext";
+
 export default function Header() {
+    const { usuario, logout } = useAuth();
     return (
         <header className="
             h-16
@@ -53,10 +57,10 @@ export default function Header() {
 
                         <div className="hidden sm:flex flex-col leading-tight">
                             <span className="text-sm text-zinc-200">
-                                Professor
+                                {usuario?.nome || "Professor"}
                             </span>
                             <span className="text-xs text-zinc-400">
-                                professor@email.com
+                                {usuario?.email || "professor@email.com"}
                             </span>
                         </div>
 
@@ -67,7 +71,9 @@ export default function Header() {
                         text-zinc-400
                         hover:text-red-400
                         transition
-                    ">
+                    "
+                     onClick={() => logout()}
+                     >
                         Sair
                     </button>
 
