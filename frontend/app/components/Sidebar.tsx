@@ -151,6 +151,7 @@ export default function Sidebar() {
                         hover:bg-zinc-800
                         hover:text-red-400
                         transition
+                        cursor-pointer
                     "
                     onClick={() => logout()}
                 >

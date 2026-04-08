@@ -71,6 +71,7 @@ export default function Header() {
                         text-zinc-400
                         hover:text-red-400
                         transition
+                        cursor-pointer
                     "
                      onClick={() => logout()}
                      >
