@@ -1,13 +1,15 @@
 'use client'
 
+import Loading from "@/app/components/Loading";
 import { Usuario } from "@/app/context/AuthContext";
-import { UsuarioMock } from "@/app/mock/usuario";
+import { api } from "@/app/utils/api";
 import Link from "next/link";
 import { useEffect, useState } from "react";
 
 export default function UsuariosPage() {
 
     const [usuarios, setUsuarios] = useState<Usuario[]>([]);
+    const [carregando, setCarregando] = useState(true);
 
     useEffect(() => {
         carregarDados();
@@ -15,20 +17,32 @@ export default function UsuariosPage() {
 
     const carregarDados = async () => {
         try {
-            const response = await fetch("http://localhost:8080/usuarios");
-            const dados = await response.json();
-            setUsuarios(dados);
+            const response = await api.get<Usuario[]>("/usuarios");
+            if(response.status !== 200){
+                alert("Erro ao carregar usuários!");
+                return;
+            }
+            const usuarios = response.data;
+            setUsuarios(usuarios);
         } catch (error) {
             console.error(error)
+        } finally {
+            setCarregando(false);
         }
     }
 
     const handlerAlterarStatus = async (usuario: Usuario) => {
         try {
+            const novoStatus = usuario.status === 'ATIVO' ? 'INATIVO' : 'ATIVO';
+            const response = await api.put(`/usuarios/${usuario.id}/AlterarStatus`, { status: novoStatus });
+            if(response.status !== 200){
+                alert("Erro ao alterar status do usuário!");
+                return;
+            }
             setUsuarios(usuariosAtuais =>
                 usuariosAtuais.map(u =>
                     u.id === usuario.id
-                        ? new Usuario(u.id, u.nome, u.email, u.senha, u.status === 'ATIVO' ? 'INATIVO' : 'ATIVO')
+                        ? new Usuario(u.id, u.nome, u.email, novoStatus)
                         : u
                 ));
         } catch (error) {
@@ -75,12 +89,19 @@ export default function UsuariosPage() {
                         </thead>
 
                         <tbody>
-                            {usuarios.map((usuario) => (
-                                <tr
-                                    key={usuario.id}
-                                    className="border-b border-zinc-800 hover:bg-zinc-800/50 transition"
-                                >
-                                    <td className="px-6 py-4 text-zinc-300">#{usuario.id}</td>
+                            {carregando ? (
+                                <tr>
+                                    <td colSpan={5}>
+                                        <Loading message="Carregando usuarios..." />
+                                    </td>
+                                </tr>
+                            ) : (
+                                usuarios.map((usuario) => (
+                                    <tr
+                                        key={usuario.id}
+                                        className="border-b border-zinc-800 hover:bg-zinc-800/50 transition"
+                                    >
+                                        <td className="px-6 py-4 text-zinc-300">#{usuario.id}</td>
                                     <td className="px-6 py-4 text-white font-medium">{usuario.nome}</td>
                                     <td className="px-6 py-4 text-zinc-400">{usuario.email}</td>
                                     <td className="px-6 py-4">
@@ -97,7 +118,6 @@ export default function UsuariosPage() {
                                     <td className="px-6 py-4">
                                         <div className="flex justify-end gap-2">
 
-                                            {/* EDITAR */}
                                             <Link
                                                 href={`/usuarios/${usuario.id}/editar`}
                                                 className="px-3 py-1.5 text-xs rounded-md bg-zinc-800 text-zinc-300 hover:bg-zinc-700 hover:text-white transition cursor-pointer"
@@ -105,7 +125,6 @@ export default function UsuariosPage() {
                                                 Editar
                                             </Link>
 
-                                            {/* ATIVAR / INATIVAR */}
                                             <button
                                                 onClick={() => handlerAlterarStatus(usuario)}
                                                 className={`
@@ -122,7 +141,7 @@ export default function UsuariosPage() {
                                         </div>
                                     </td>
                                 </tr>
-                            ))}
+                            )))}
                         </tbody>
                     </table>
 

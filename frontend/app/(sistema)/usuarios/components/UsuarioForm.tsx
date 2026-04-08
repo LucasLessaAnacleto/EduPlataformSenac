@@ -2,6 +2,7 @@
 
 import { Usuario } from "@/app/context/AuthContext"
 import { UsuarioMock } from "@/app/mock/usuario";
+import { api } from "@/app/utils/api";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react"
@@ -11,13 +12,11 @@ interface UsuarioFormProps {
 }
 
 export default function UsuarioForm({ usuarioExistente }: UsuarioFormProps) {
-
-    const [usuario, setUsuario] = useState<any>(
+    const [usuario, setUsuario] = useState<Usuario>(
         usuarioExistente || {
-            id: 0,
+            id: -1,
             nome: '',
             email: '',
-            senha: '',
             status: 'ATIVO'
         }
     );
@@ -31,8 +30,25 @@ export default function UsuarioForm({ usuarioExistente }: UsuarioFormProps) {
         }))
     }
 
-    const handleSalvar = async () => {
-        await UsuarioMock.salvar(usuario);
+    const handleSalvar = async (formData: FormData) => {
+        const senha = formData.get("senha")?.toString();
+        let response;
+        let message: string;
+        if(usuario.id === -1){
+            message = "criar"
+            if(!senha){
+                alert("A senha é obrigatória!");
+                return;
+            }
+            response = await api.post<Number>('/usuarios', {...usuario, id: undefined, senha}); // cria
+        }else{
+            message = "editar"
+            response = await api.put<Usuario>(`/usuarios/${usuario.id}`, {...usuario, senha: senha || undefined}); // edita
+        }
+        if(response.status !== 200){
+            alert(`Erro ao ${message} usuário!`);
+            return;
+        }
         alert("Usuário salvo com sucesso!");
         router.push("/usuarios");
     }
@@ -73,6 +89,7 @@ export default function UsuarioForm({ usuarioExistente }: UsuarioFormProps) {
                             onChange={(e) => handleChange('nome', e.target.value)}
                             placeholder="João da Silva"
                             className="bg-zinc-950 border border-zinc-800 rounded-lg px-4 py-2.5 text-sm text-zinc-200 outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/30 transition"
+                            name="nome"
                         />
                     </div>
 
@@ -88,6 +105,7 @@ export default function UsuarioForm({ usuarioExistente }: UsuarioFormProps) {
                             onChange={(e) => handleChange('email', e.target.value)}
                             placeholder="usuario@email.com"
                             className="bg-zinc-950 border border-zinc-800 rounded-lg px-4 py-2.5 text-sm text-zinc-200 outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/30 transition"
+                            name="email"
                         />
                     </div>
 
@@ -99,10 +117,9 @@ export default function UsuarioForm({ usuarioExistente }: UsuarioFormProps) {
 
                         <input
                             type="password"
-                            value={usuario.senha}
-                            onChange={(e) => handleChange('senha', e.target.value)}
-                            placeholder={usuario.id ? "Deixe em branco para não alterar" : "••••••••"}
+                            placeholder={usuario.id > 0 ? "Deixe em branco para não alterar" : "••••••••"}
                             className="bg-zinc-950 border border-zinc-800 rounded-lg px-4 py-2.5 text-sm text-zinc-200 outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/30 transition"
+                            name="senha"
                         />
                     </div>
 
@@ -115,8 +132,8 @@ export default function UsuarioForm({ usuarioExistente }: UsuarioFormProps) {
                         <select
                             value={usuario.status}
                             onChange={(e) => handleChange('status', e.target.value)}
-                            className="
-                                bg-zinc-950
+                            disabled={usuario.id === -1}
+                            className={`bg-zinc-950
                                 border border-zinc-800
                                 rounded-lg
                                 px-4 py-2.5
@@ -127,7 +144,9 @@ export default function UsuarioForm({ usuarioExistente }: UsuarioFormProps) {
                                 focus:ring-2
                                 focus:ring-blue-500/30
                                 transition
-                            "
+                                ${usuario.id === -1 ? 'cursor-not-allowed opacity-50' : ''}
+                            `}
+                            name="status"
                         >
                             <option value="ATIVO">Ativo</option>
                             <option value="INATIVO">Inativo</option>

@@ -3,16 +3,15 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Logo from "../components/Logo";
 import { useAuth, Usuario } from "../context/AuthContext";
-import axios from "axios";
+import { api } from "../utils/api";
 
 interface LoginResponse{
     token: string;
+    usuario: Usuario;
 }
 
 export default function LoginPage() {
     const { login } = useAuth();
-    const [email, setEmail] = useState("");
-    const [senha, setSenha] = useState("");
     const router = useRouter();
 
      async function handleLogin(formData: FormData) {
@@ -25,7 +24,7 @@ export default function LoginPage() {
         }
 
         try {
-            const response = await axios.post<LoginResponse>(
+            const response = await api.post<LoginResponse>(
                 "http://localhost:8080/auth/login",
                 { email, senha }
             );
@@ -34,15 +33,15 @@ export default function LoginPage() {
                 alert("Usuário ou senha inválido!");
                 return;
             }
-
-            const usuarioMock = new Usuario(
-                1,
-                "Professor Lucas Lessa",
-                email,
-                "ATIVO"
+            const data = response.data;
+            const usuario = new Usuario(
+                data.usuario.id,
+                data.usuario.nome,
+                data.usuario.email,
+                data.usuario.status
             );
 
-            login(usuarioMock, response.data.token);
+            login(usuario, data.token);
 
             router.push("/home");
 
@@ -51,6 +50,7 @@ export default function LoginPage() {
             alert("Erro ao entrar no sistema!");
         }
     }
+    
     return (
         <div className="min-h-screen flex items-center justify-center bg-linear-to-br from-zinc-950 via-zinc-900 to-black text-zinc-100">
 
@@ -65,7 +65,7 @@ export default function LoginPage() {
                     </p>
                 </div>
 
-                <form className="space-y-6">
+                <form className="space-y-6" action={handleLogin}>
 
                     <div className="flex flex-col gap-2">
                         <label className="text-sm text-zinc-400">
@@ -87,7 +87,7 @@ export default function LoginPage() {
                                 focus:ring-blue-500/30
                                 transition
                             "
-                            onChange={e => setEmail(e.target.value)}
+                            name="email"
                         />
                     </div>
 
@@ -111,7 +111,7 @@ export default function LoginPage() {
                                 focus:ring-blue-500/30
                                 transition
                             "
-                            onChange={e => setSenha(e.target.value)}
+                            name="senha"
                         />
                     </div>
 
@@ -130,7 +130,6 @@ export default function LoginPage() {
                             shadow-lg
                             shadow-blue-600/20
                         "
-                        onClick={handleLogin}
                     >
                         Acessar
                     </button>

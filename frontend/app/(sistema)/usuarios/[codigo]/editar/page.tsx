@@ -1,11 +1,12 @@
 'use client'
 
 import { Usuario } from "@/app/context/AuthContext";
-import { UsuarioMock } from "@/app/mock/usuario";
 import Link from "next/link";
 import { useParams, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import UsuarioForm from "../../components/UsuarioForm";
+import Loading from "@/app/components/Loading";
+import { api } from "@/app/utils/api";
 
 export default function EditarUsuario() {
 
@@ -22,11 +23,15 @@ export default function EditarUsuario() {
 
     const buscarDados = async () => {
         try {
-            const user = await UsuarioMock.buscarPorId(id);
-            if (user) setUsuario(user);
-            else router.push("/usuarios");
+            const response = await api.get<Usuario>(`/usuarios/${id}`);
+            if(response.status !== 200 || !response.data){
+                throw new Error("Usuário não encontrado!");
+            }
+            console.log(response.data);
+            setUsuario(response.data);
         } catch (error) {
             console.error(error);
+            alert("Erro ao carregar dados do usuário!");
             router.push("/usuarios");
         } finally {
             setCarregando(false);
@@ -35,9 +40,7 @@ export default function EditarUsuario() {
 
     if (carregando) {
         return (
-            <div className="p-8 text-white">
-                Carregando dados do usuário...
-            </div>
+            <Loading message="Carregando dados do usuário..." fullScreen />
         );
     }
 
