@@ -61,7 +61,6 @@ public class ProfessorController {
         novoProfessor.setNome(professor.getNome());
         novoProfessor.setEmail(professor.getEmail());
         novoProfessor.setSenha(professor.getSenha());
-        novoProfessor.setBiografia(professor.getBiografia());
 
         return ResponseEntity.ok(professorRepository.save(novoProfessor).getId());
     }

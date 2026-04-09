@@ -13,20 +13,11 @@ export default function Header() {
 
             <div className="max-w-7xl mx-auto px-6 h-full flex items-center justify-between">
 
-                {/* Lado esquerdo */}
                 <div className="flex items-center gap-4">
 
                     <div className="flex items-center gap-3">
 
-                        <div className="
-                            w-8 h-8
-                            rounded-lg
-                            bg-blue-600
-                            flex items-center
-                            justify-center
-                            text-sm
-                            font-bold
-                        ">
+                        <div className="w-8 h-8 rounded-lg bg-blue-600 flex items-center justify-center text-sm font-bold"> 
                             EP
                         </div>
 
@@ -52,7 +43,7 @@ export default function Header() {
                             text-sm
                             font-semibold
                         ">
-                            P
+                            {usuario?.nome?.at(0) || "P"}
                         </div>
 
                         <div className="hidden sm:flex flex-col leading-tight">

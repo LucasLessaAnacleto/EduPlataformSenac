@@ -37,7 +37,7 @@ public class AuthController {
             String email = professorDb.getEmail();
 
             LoginResponse loginResponse = new LoginResponse(TokenUtil.generateToken(professorId, email),
-                    new ProfessorResponse(professorId, professorDb.getNome(), professorDb.getBiografia(), email)
+                    new ProfessorResponse(professorId, professorDb.getNome(), email, professorDb.getBiografia())
             );
 
             return ResponseEntity.ok(loginResponse);

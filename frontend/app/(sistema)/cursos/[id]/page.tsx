@@ -1,42 +1,70 @@
 'use client'
 
+import Loading from "@/app/components/Loading";
 import ModalEditarModulo from "@/app/components/ModalEditarModulo";
 import ModalNovoModulo from "@/app/components/ModalNovoModulo";
-import { useState } from "react";
+import { Curso, Matricula, Modulo } from "@/app/types";
+import { api } from "@/app/utils/api";
+import { useParams } from "next/navigation";
+import { useEffect, useState } from "react";
 
 export default function CursoDetalhe() {
 
-    const [modalOpen, setModalOpen] = useState(false);
-    const [modalOpenEdit, setModalOpenEdit] = useState<null|number>(null);
+    const params = useParams()
+    const cursoId = Number(params.id)
 
-    const module = {
-        id: "1",
-        title: "Introdução ao React",
-        order: 1
+    const [curso, setCurso] = useState<Curso | null>(null)
+    const [modulos, setModulos] = useState<Modulo[]>([])
+    const [matriculas, setMatriculas] = useState<Matricula[]>([])
+    const [loading, setLoading] = useState(true)
+
+    const [modalOpen, setModalOpen] = useState(false)
+    const [modalOpenEdit, setModalOpenEdit] = useState<number | null>(null)
+
+    useEffect(() => {
+        fetchData()
+    }, [])
+
+    const fetchData = async () => {
+        try {
+
+            const [cursoRes, modulosRes, matriculasRes] = await Promise.all([
+                api.get<Curso>(`/cursos/${cursoId}`),
+                api.get<Modulo[]>(`/cursos/${cursoId}/modulos`),
+                api.get<Matricula[]>(`/cursos/${cursoId}/matriculas`)
+            ])
+
+            setCurso(cursoRes.data)
+            setModulos(modulosRes.data)
+            setMatriculas(matriculasRes.data)
+
+        } catch (error) {
+            console.error(error)
+            alert("Erro ao carregar dados do curso!")
+        } finally {
+            setLoading(false)
+        }
     }
 
+    if (loading) {
+        return <Loading message="Carregando curso..." />
+    }
+
+    if (!curso) {
+        return <div className="text-red-400 p-6">Curso não encontrado</div>
+    }
 
     return (
         <div className="space-y-8">
-
-            {/* Cabeçalho do curso */}
-            <div className="
-                bg-zinc-900
-                border border-zinc-800
-                rounded-xl
-                p-6
-            ">
+            <div className="bg-zinc-900 border border-zinc-800 rounded-xl p-6">
                 <div className="flex items-start justify-between">
-
                     <div>
                         <h1 className="text-2xl font-semibold text-zinc-100">
-                            React para Iniciantes
+                            {curso.titulo}
                         </h1>
 
                         <p className="text-sm text-zinc-400 mt-2 max-w-xl">
-                            Curso completo ensinando fundamentos do React,
-                            criação de componentes, hooks e boas práticas
-                            para desenvolvimento moderno.
+                            {curso.descricao}
                         </p>
                     </div>
 
@@ -47,28 +75,14 @@ export default function CursoDetalhe() {
                         px-3 py-1.5
                         rounded-lg
                     ">
-                        R$ 129
+                        R$ {curso.preco}
                     </div>
-
                 </div>
             </div>
 
+            <div className="grid gap-8 lg:grid-cols-2">
 
-            {/* Conteúdo principal */}
-            <div className="
-                grid
-                gap-8
-                lg:grid-cols-2
-            ">
-
-
-                {/* MÓDULOS */}
-                <div className="
-                    bg-zinc-900
-                    border border-zinc-800
-                    rounded-xl
-                    p-6
-                ">
+                <div className="bg-zinc-900 border border-zinc-800 rounded-xl p-6">
 
                     <div className="flex items-center justify-between mb-6">
 
@@ -76,16 +90,17 @@ export default function CursoDetalhe() {
                             Módulos do Curso
                         </h2>
 
-                        <button className="
-                            text-sm
-                            bg-blue-600
-                            hover:bg-blue-500
-                            text-white
-                            px-3 py-1.5
-                            rounded-lg
-                            transition
-                        "
+                        <button
                             onClick={() => setModalOpen(true)}
+                            className="
+                                text-sm
+                                bg-blue-600
+                                hover:bg-blue-500
+                                text-white
+                                px-3 py-1.5
+                                rounded-lg
+                                transition
+                            "
                         >
                             + Novo módulo
                         </button>
@@ -93,83 +108,39 @@ export default function CursoDetalhe() {
                     </div>
 
 
-                    {/* Lista de módulos */}
                     <div className="space-y-3">
 
-                        <div className="
-                            flex items-center justify-between
-                            p-3
-                            rounded-lg
-                            bg-zinc-950
-                            border border-zinc-800
-                        ">
+                        {modulos
+                            .sort((a, b) => a.ordem - b.ordem)
+                            .map((modulo) => (
+                                <div
+                                    key={modulo.id}
+                                    className="
+                                        flex items-center justify-between
+                                        p-3
+                                        rounded-lg
+                                        bg-zinc-950
+                                        border border-zinc-800
+                                    "
+                                >
 
-                            <span className="text-sm text-zinc-300">
-                                1. Introdução ao React
-                            </span>
+                                    <span className="text-sm text-zinc-300">
+                                        {modulo.ordem}. {modulo.titulo}
+                                    </span>
 
-                            <button className="
-                                text-xs
-                                text-blue-400
-                                hover:text-blue-300
-                            "
-                                onClick={() => setModalOpenEdit(1)}
-                            >
-                                Editar
-                            </button>
+                                    <button
+                                        onClick={() => setModalOpenEdit(modulo.id)}
+                                        className="
+                                            text-xs
+                                            text-blue-400
+                                            hover:text-blue-300
+                                        "
+                                    >
+                                        Editar
+                                    </button>
 
-                        </div>
-
-
-                        <div className="
-                            flex items-center justify-between
-                            p-3
-                            rounded-lg
-                            bg-zinc-950
-                            border border-zinc-800
-                        ">
-
-                            <span className="text-sm text-zinc-300">
-                                2. Componentes e Props
-                            </span>
-
-                            <button className="
-                                text-xs
-                                text-blue-400
-                                hover:text-blue-300
-                            " 
-                                onClick={() => setModalOpenEdit(1)}
-                             
-                            >
-                                Editar
-                            </button>
-
-                        </div>
-
-
-                        <div className="
-                            flex items-center justify-between
-                            p-3
-                            rounded-lg
-                            bg-zinc-950
-                            border border-zinc-800
-                        ">
-
-                            <span className="text-sm text-zinc-300">
-                                3. Hooks Essenciais
-                            </span>
-
-                            <button className="
-                                text-xs
-                                text-blue-400
-                                hover:text-blue-300
-                            "    
-                                onClick={() => setModalOpenEdit(1)}
-                            >
-                                Editar
-                            </button>
-
-                        </div>
+                                </div>
+                            ))}
 
                     </div>
 
@@ -177,13 +148,8 @@ export default function CursoDetalhe() {
 
 
 
-                {/* ALUNOS */}
-                <div className="
-                    bg-zinc-900
-                    border border-zinc-800
-                    rounded-xl
-                    p-6
-                ">
+                {/* MATRÍCULAS */}
+                <div className="bg-zinc-900 border border-zinc-800 rounded-xl p-6">
 
                     <h2 className="font-semibold text-zinc-100 mb-6">
                         Alunos Matriculados
@@ -203,23 +169,17 @@ export default function CursoDetalhe() {
 
                             <tbody className="text-zinc-300">
 
-                                <tr className="border-b border-zinc-800">
-                                    <td className="py-3">João Silva</td>
-                                    <td>joao@email.com</td>
-                                    <td>12/03/2026</td>
-                                </tr>
+                                {matriculas.map((m) => (
+                                    <tr key={m.id} className="border-b border-zinc-800">
 
-                                <tr className="border-b border-zinc-800">
-                                    <td className="py-3">Maria Souza</td>
-                                    <td>maria@email.com</td>
-                                    <td>15/03/2026</td>
-                                </tr>
+                                        <td className="py-3">{m.nomeAluno}</td>
+                                        <td>{m.emailAluno}</td>
+                                        <td>
+                                            {new Date(m.data).toLocaleDateString()}
+                                        </td>
 
-                                <tr>
-                                    <td className="py-3">Carlos Lima</td>
-                                    <td>carlos@email.com</td>
-                                    <td>18/03/2026</td>
-                                </tr>
+                                    </tr>
+                                ))}
 
                             </tbody>
 
@@ -231,16 +191,19 @@ export default function CursoDetalhe() {
 
             </div>
 
+
+            {/* MODAIS */}
             <ModalNovoModulo
                 open={modalOpen}
                 onClose={() => setModalOpen(false)}
             />
 
             <ModalEditarModulo
-                onClose={() => setModalOpenEdit(null)}
                 open={modalOpenEdit}
-                module={module}
+                onClose={() => setModalOpenEdit(null)}
+                modulo={modulos.find(m => m.id === modalOpenEdit)}
             />
+
         </div>
     )
 }

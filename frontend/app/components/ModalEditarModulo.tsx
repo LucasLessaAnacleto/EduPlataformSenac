@@ -1,14 +1,12 @@
+import { Modulo } from "../types"
+
 type Props = {
     open: null|number
     onClose: () => void
-    module?: {
-        id: string
-        title: string
-        order: number
-    }
+    modulo?: Modulo
 }
 
-export default function ModalEditarModulo({ open, onClose, module }: Props) {
+export default function ModalEditarModulo({ open, onClose, modulo }: Props) {
 
     if (!open) return null
 
@@ -63,7 +61,7 @@ export default function ModalEditarModulo({ open, onClose, module }: Props) {
 
                         <input
                             type="text"
-                            defaultValue={module?.title}
+                            defaultValue={modulo?.titulo}
                             className="
                                 bg-zinc-950
                                 border border-zinc-800
@@ -90,7 +88,7 @@ export default function ModalEditarModulo({ open, onClose, module }: Props) {
 
                         <input
                             type="number"
-                            defaultValue={module?.order}
+                            defaultValue={modulo?.ordem}
                             className="
                                 bg-zinc-950
                                 border border-zinc-800

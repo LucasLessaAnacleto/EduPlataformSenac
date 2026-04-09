@@ -1,11 +1,38 @@
+import { useRouter } from "next/navigation";
+import { api } from "../utils/api";
+
 type Props = {
     open: boolean
     onClose: () => void
 }
 
 export default function ModalNovoCurso({ open, onClose }: Props) {
+    if (!open) return null;
+    const router = useRouter();
 
-    if (!open) return null
+    async function handleNovoCurso(formData: FormData) {
+        const titulo = formData.get("titulo")?.toString();
+        const descricao = formData.get("descricao")?.toString();
+        const preco = formData.get("preco")?.toString();
+
+        if(!titulo || !descricao || !preco) {
+            alert("Preencha todos os campos!")
+            return
+        }
+
+        const response = await api.post<Number>("/cursos", {
+            titulo,
+            descricao,
+            preco: parseFloat(preco)
+        });
+
+        if(response.status !== 200) {
+            alert("Erro ao criar curso!")
+            return
+        }
+        alert("Curso criado com sucesso!");
+        router.push("/cursos");
+    }
 
     return (
         <div className="
@@ -47,7 +74,7 @@ export default function ModalNovoCurso({ open, onClose }: Props) {
 
 
                 {/* Form */}
-                <form className="space-y-5">
+                <form className="space-y-5" action={handleNovoCurso}>
 
                     {/* Título */}
                     <div className="flex flex-col gap-2">
@@ -71,12 +98,11 @@ export default function ModalNovoCurso({ open, onClose }: Props) {
                                 focus:ring-2
                                 focus:ring-blue-500/30
                             "
+                            name="titulo"
                         />
 
                     </div>
 
-
-                    {/* Descrição */}
                     <div className="flex flex-col gap-2">
 
                         <label className="text-sm text-zinc-400">
@@ -99,6 +125,7 @@ export default function ModalNovoCurso({ open, onClose }: Props) {
                                 focus:ring-2
                                 focus:ring-blue-500/30
                             "
+                            name="descricao"
                         />
 
                     </div>
@@ -126,6 +153,7 @@ export default function ModalNovoCurso({ open, onClose }: Props) {
                                 focus:ring-2
                                 focus:ring-blue-500/30
                             "
+                            name="preco"
                         />
 
                     </div>

@@ -1,4 +1,5 @@
 'use client'
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 
 export default function LandingPage() {
@@ -39,21 +40,13 @@ export default function LandingPage() {
 
           <div className="flex items-center gap-4">
 
-            <button className="text-sm text-zinc-400 cursor-pointer hover:text-white" onClick={() => router.push("/login")}>
+            <Link className="text-sm text-zinc-400 cursor-pointer hover:text-white" href="/login">
               Entrar
-            </button>
+            </Link>
 
-            <button className="
-              bg-blue-600
-              hover:bg-blue-500
-              text-white
-              text-sm
-              px-4
-              py-2
-              rounded-lg
-            ">
+            <Link className="bg-blue-600 hover:bg-blue-500 text-white text-sm px-4 py-2 rounded-lg" href="/nova-conta">
               Criar conta
-            </button>
+            </Link>
 
           </div>
 

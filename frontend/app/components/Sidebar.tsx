@@ -59,7 +59,7 @@ export default function Sidebar() {
             </nav>
 
             <div className="border-t border-zinc-800 p-4">
-                <button onClick={logout} className="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm text-zinc-400 hover:bg-zinc-800 hover:text-red-400 transition">
+                <button onClick={logout} className="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm text-zinc-400 hover:bg-zinc-800 hover:text-red-400 transition cursor-pointer">
                     <LogOut className="w-4 h-4" />
                     Sair
                 </button>
