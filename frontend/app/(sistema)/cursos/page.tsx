@@ -7,16 +7,24 @@ import CursoCard from "@/app/components/CursoCard"
 import Loading from "@/app/components/Loading"
 import { api } from "@/app/utils/api"
 import { Curso } from "@/app/types"
+import { usePesquisa } from "@/app/context/PesquisaContext"
 
 export default function CursosPage() {
 
     const [modalOpen, setModalOpen] = useState(false)
     const [cursos, setCursos] = useState<Curso[]>([])
-    const [loading, setLoading] = useState(true)
+    const [loading, setLoading] = useState(true);
+    const [pesquisa, setPesquisa] = useState("");
+    const { pesquisas, adicionarPesquisa, limparPesquisas } = usePesquisa();
+    const [isFocused, setIsFocused] = useState(false)
 
     useEffect(() => {
         buscaCursos()
-    }, [])
+    }, []);
+
+    const handleNovoCurso = async(curso: Curso) => {
+        setCursos(prev => [...prev, curso]);
+    }
 
     const buscaCursos = async () => {
         try {
@@ -83,12 +91,59 @@ export default function CursosPage() {
                         focus:ring-blue-500/30
                         transition
                     "
+                    value={pesquisa}
+                    onChange={(e) => setPesquisa(e.target.value)}
+                    onKeyDown={(e) => {
+                        if (e.key === "Enter" && pesquisa.trim()) {
+                            adicionarPesquisa(pesquisa)
+                        }
+                    }}
+                    onFocus={() => setIsFocused(true)}
+                    onBlur={() => setTimeout(() => {setIsFocused(false)},100)}
                 />
+                {isFocused && pesquisas.length > 0 && (
+                    <div className="mt-3 flex flex-wrap items-center gap-2">
+
+                        {pesquisas.map((p, index) => (
+                            <button
+                                key={index}
+                                onClick={() => setPesquisa(p.termo)}
+                                className="
+                                    text-xs
+                                    bg-zinc-800
+                                    hover:bg-zinc-700
+                                    text-zinc-300
+                                    px-3 py-1.5
+                                    rounded-lg
+                                    transition
+                                "
+                            >
+                                {p.termo}
+                            </button>
+                        ))}
+
+                        <button
+                            onClick={limparPesquisas}
+                            className="
+                                text-xs
+                                text-red-400
+                                hover:text-red-300
+                                ml-2 cursor-pointer
+                            "
+                        >
+                            Limpar
+                        </button>
+
+                    </div>
+            )}
             </div>
 
             <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
 
-                {cursos.map((curso) => (
+                {cursos.filter(curso => {
+                    if(!pesquisa) return true;
+                    return curso.titulo.toLowerCase().includes(pesquisa.toLocaleLowerCase()) 
+                }).map((curso) => (
                     <CursoCard key={curso.id} curso={curso} />
                 ))}
 
@@ -120,6 +175,7 @@ export default function CursosPage() {
             <ModalNovoCurso
                 open={modalOpen}
                 onClose={() => setModalOpen(false)}
+                onCreate={handleNovoCurso}
             />
 
         </div>

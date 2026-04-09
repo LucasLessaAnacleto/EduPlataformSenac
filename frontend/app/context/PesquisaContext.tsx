@@ -35,8 +35,8 @@ export function PesquisaProvider({ children }: { children: ReactNode }) {
             termo,
             data: new Date().toISOString()
         };
-
-        const novasPesquisas = [novaPesquisa, ...pesquisas].slice(0, 5); // guarda só as 5 últimas
+        if(pesquisas.find(p => p.termo === termo)) return;
+        const novasPesquisas = [novaPesquisa, ...pesquisas]; 
 
         setPesquisas(novasPesquisas);
         Cookies.set('pesquisas', JSON.stringify(novasPesquisas), { expires: 7 });

@@ -1,13 +1,15 @@
 import { useRouter } from "next/navigation";
 import { api } from "../utils/api";
+import { Modulo } from "../types";
 
 type Props = {
     open: boolean
     onClose: () => void,
-    cursoId: number
+    cursoId: number,
+    onCreate: (modulo: Modulo) => void
 }
 
-export default function ModalNovoModulo({ open, onClose, cursoId }: Props) {
+export default function ModalNovoModulo({ open, onClose, cursoId, onCreate }: Props) {
     if (!open) return null;
 
     const router = useRouter();
@@ -24,6 +26,7 @@ export default function ModalNovoModulo({ open, onClose, cursoId }: Props) {
         const response = await api.post<Number>("/modulos", {
             titulo,
             ordem,
+            cursoId
         });
 
         if(response.status !== 200) {
@@ -31,7 +34,12 @@ export default function ModalNovoModulo({ open, onClose, cursoId }: Props) {
             return
         }
         alert("Modulo criado com sucesso!");
-        router.push(`/cursos/${cursoId}`);
+        onCreate({
+            id: Number(response.data),
+            titulo,
+            ordem
+        })
+        onClose()
     }
 
 

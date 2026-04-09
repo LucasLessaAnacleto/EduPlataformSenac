@@ -1,14 +1,52 @@
+'use client'
 import { Modulo } from "../types"
+import { api } from "../utils/api"
 
 type Props = {
     open: null|number
     onClose: () => void
-    modulo?: Modulo
+    modulo: Modulo,
+    onUpdate: (id: Number, modulo: Modulo) => void
 }
 
-export default function ModalEditarModulo({ open, onClose, modulo }: Props) {
+export default function ModalEditarModulo({
+    open,
+    onClose,
+    modulo,
+    onUpdate
+}: Props) {
 
-    if (!open) return null
+    if (!open || !modulo) return null
+
+    async function handleUpdate(formData: FormData) {
+        const titulo = formData.get("titulo")?.toString()
+        const ordem = Number(formData.get("ordem")?.toString() || 0)
+
+        if (!titulo || !ordem) {
+            alert("Preencha todos os campos!")
+            return
+        }
+
+        const response = await api.put(`/modulos/${modulo.id}`, {
+            titulo,
+            ordem
+        })
+
+        if (response.status !== 200) {
+            alert("Erro ao atualizar módulo!")
+            return
+        }
+
+        alert("Módulo atualizado!")
+
+        onUpdate(modulo.id, {
+            ...modulo,
+            titulo,
+            ordem
+        })
+
+        onClose()
+    }
 
     return (
         <div className="
@@ -28,7 +66,6 @@ export default function ModalEditarModulo({ open, onClose, modulo }: Props) {
                 p-6
             ">
 
-                {/* Header */}
                 <div className="flex items-center justify-between mb-6">
 
                     <h2 className="text-lg font-semibold text-zinc-100">
@@ -48,11 +85,8 @@ export default function ModalEditarModulo({ open, onClose, modulo }: Props) {
 
                 </div>
 
+                <form className="space-y-5" action={handleUpdate}>
 
-                {/* Form */}
-                <form className="space-y-5">
-
-                    {/* Título */}
                     <div className="flex flex-col gap-2">
 
                         <label className="text-sm text-zinc-400">
@@ -60,8 +94,9 @@ export default function ModalEditarModulo({ open, onClose, modulo }: Props) {
                         </label>
 
                         <input
+                            name="titulo"
                             type="text"
-                            defaultValue={modulo?.titulo}
+                            defaultValue={modulo.titulo}
                             className="
                                 bg-zinc-950
                                 border border-zinc-800
@@ -78,7 +113,6 @@ export default function ModalEditarModulo({ open, onClose, modulo }: Props) {
 
                     </div>
 
-
                     {/* Ordem */}
                     <div className="flex flex-col gap-2">
 
@@ -87,8 +121,9 @@ export default function ModalEditarModulo({ open, onClose, modulo }: Props) {
                         </label>
 
                         <input
+                            name="ordem"
                             type="number"
-                            defaultValue={modulo?.ordem}
+                            defaultValue={modulo.ordem}
                             className="
                                 bg-zinc-950
                                 border border-zinc-800
@@ -108,7 +143,6 @@ export default function ModalEditarModulo({ open, onClose, modulo }: Props) {
                         </span>
 
                     </div>
-
 
                     {/* Botões */}
                     <div className="flex justify-end gap-3 pt-4">

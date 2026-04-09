@@ -105,6 +105,37 @@ public class MatriculaController {
         }
     }
 
+    @PutMapping("/matriculas/{id}")
+    @Operation(summary = "Atualizar matrícula", description = "Valida professor dono e não permite alterar curso")
+    public ResponseEntity<?> atualizar(@PathVariable Long id,@RequestBody MatriculaRequest requestDto,HttpServletRequest request) {
+
+        try {
+            Professor professor = getProfessor(request);
+
+            Matricula matriculaBanco = matriculaRepository.findById(id).orElse(null);
+
+            if (matriculaBanco == null) {
+                return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+            }
+
+            Curso curso = matriculaBanco.getCurso();
+
+            if (!curso.getProfessor().equals(professor)) {
+                return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+            }
+
+            matriculaBanco.setNomeAluno(requestDto.nomeAluno());
+            matriculaBanco.setEmailAluno(requestDto.emailAluno());
+
+            matriculaRepository.save(matriculaBanco);
+
+            return ResponseEntity.ok(matriculaBanco);
+
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        }
+    }
+
     @DeleteMapping("/matriculas/{id}")
     @Operation(summary = "Deletar matrícula", description = "Remove aluno do curso (somente professor dono)")
     public ResponseEntity<?> deletar(@PathVariable Long id, HttpServletRequest request){

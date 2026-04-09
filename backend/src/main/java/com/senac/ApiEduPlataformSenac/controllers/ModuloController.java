@@ -88,7 +88,16 @@ public class ModuloController {
         try {
             Professor professor = getProfessor(request);
 
-            Curso curso = cursoRepository.findById(requestDto.cursoId()).orElse(null);
+            System.out.println("id professor: "+professor.getId().toString());
+
+            Long cursoId;
+            try{
+                cursoId = requestDto.cursoId();
+            }catch (Exception e){
+                return ResponseEntity.badRequest().body("CursoId deve ser informado!");
+            }
+
+            Curso curso = cursoRepository.findById(cursoId).orElse(null);
 
             if (curso == null) {
                 return ResponseEntity.status(HttpStatus.NOT_FOUND).build();

@@ -1,12 +1,14 @@
 import { useRouter } from "next/navigation";
 import { api } from "../utils/api";
+import { Curso } from "../types";
 
 type Props = {
     open: boolean
-    onClose: () => void
+    onClose: () => void,
+    onCreate: (curso: Curso) => void
 }
 
-export default function ModalNovoCurso({ open, onClose }: Props) {
+export default function ModalNovoCurso({ open, onClose, onCreate }: Props) {
     if (!open) return null;
     const router = useRouter();
 
@@ -31,7 +33,13 @@ export default function ModalNovoCurso({ open, onClose }: Props) {
             return
         }
         alert("Curso criado com sucesso!");
-        router.push("/cursos");
+        onCreate({
+            id: Number(response.data),
+            titulo,
+            descricao,
+            preco: parseFloat(preco)
+        });
+        onClose();
     }
 
     return (

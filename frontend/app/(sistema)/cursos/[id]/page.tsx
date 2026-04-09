@@ -1,12 +1,17 @@
 'use client'
 
 import Loading from "@/app/components/Loading";
+import ModalEditarMatricula from "@/app/components/ModalEditarMatricula";
 import ModalEditarModulo from "@/app/components/ModalEditarModulo";
+import ModalNovaMatricula from "@/app/components/ModalNovaMatricula";
 import ModalNovoModulo from "@/app/components/ModalNovoModulo";
 import { Curso, Matricula, Modulo } from "@/app/types";
 import { api } from "@/app/utils/api";
+import Link from "next/link";
 import { useParams } from "next/navigation";
 import { useEffect, useState } from "react";
+import { Pencil } from "lucide-react"
+import ModalEditarCurso from "@/app/components/ModalEditarCurso";
 
 export default function CursoDetalhe() {
 
@@ -19,7 +24,12 @@ export default function CursoDetalhe() {
     const [loading, setLoading] = useState(true)
 
     const [modalOpen, setModalOpen] = useState(false)
-    const [modalOpenEdit, setModalOpenEdit] = useState<number | null>(null)
+    const [modalOpenEdit, setModalOpenEdit] = useState<number | null>(null);
+    const [modalNovaMatricula, setModalNovaMatricula] = useState(false)
+    const [modalEditarMatricula, setModalEditarMatricula] = useState<number | null>(null);
+    
+    const [modalEditarCurso, setModalEditarCurso] = useState(false);
+
 
     useEffect(() => {
         fetchData()
@@ -46,6 +56,50 @@ export default function CursoDetalhe() {
         }
     }
 
+    const handleDeleteModulo = async (id: number) => {
+        if (!confirm("Deseja realmente excluir este módulo?")) return;
+
+        try {
+            await api.delete(`/modulos/${id}`)
+            setModulos(prev => prev.filter(m => m.id !== id))
+        } catch (error) {
+            console.error(error)
+            alert("Erro ao excluir módulo")
+        }
+    }
+
+    const handleDeleteMatricula = async (id: number) => {
+        if (!confirm("Remover matrícula?")) return;
+
+        try {
+            await api.delete(`/matriculas/${id}`)
+            setMatriculas(prev => prev.filter(m => m.id !== id))
+        } catch (error) {
+            console.error(error)
+            alert("Erro ao remover matrícula")
+        }
+    }
+
+    const handleNovoModulo = async (modulo: Modulo) => {
+        setModulos(prev => [...prev, modulo]);
+    }
+
+    const handleNovaMatricula = async(matricula: Matricula) => {
+        setMatriculas(prev => [...prev, matricula]);
+    }
+
+    const handleEditarModulo = async (id: Number, modulo: Modulo) => {
+        setModulos(prev => prev.map(item => item.id == id ? modulo : item))
+    }
+
+    const handleEditarMatricula = async (id: Number, matricula: Matricula) => {
+        setMatriculas(prev => prev.map(item => item.id == id ? matricula : item))
+    }
+
+    const handleUpdateCurso = (cursoAtualizado: Curso) => {
+        setCurso(cursoAtualizado)
+    }
+
     if (loading) {
         return <Loading message="Carregando curso..." />
     }
@@ -56,6 +110,16 @@ export default function CursoDetalhe() {
 
     return (
         <div className="space-y-8">
+            <Link href="/cursos"
+                className="
+                    inline-flex items-center gap-2
+                    text-sm text-zinc-400
+                    hover:text-zinc-200
+                    transition
+                "
+            >
+                ← Voltar para cursos
+            </Link>
             <div className="bg-zinc-900 border border-zinc-800 rounded-xl p-6">
                 <div className="flex items-start justify-between">
                     <div>
@@ -68,14 +132,23 @@ export default function CursoDetalhe() {
                         </p>
                     </div>
 
-                    <div className="
-                        bg-blue-600/20
-                        text-blue-400
-                        text-sm
-                        px-3 py-1.5
-                        rounded-lg
-                    ">
-                        R$ {curso.preco}
+                    <div>
+                        <div className="
+                            bg-blue-600/20
+                            text-blue-400
+                            text-sm
+                            px-3 py-1.5
+                            rounded-lg
+                        ">
+                            R$ {curso.preco}
+                        </div>
+                        <button
+                            onClick={() => setModalEditarCurso(true)}
+                            className="text-xs text-blue-400 hover:text-blue-300 mt-4 cursor-pointer"
+                        >
+                            Editar curso
+                        </button>
+                    <div></div>
                     </div>
                 </div>
             </div>
@@ -128,16 +201,21 @@ export default function CursoDetalhe() {
                                         {modulo.ordem}. {modulo.titulo}
                                     </span>
 
-                                    <button
-                                        onClick={() => setModalOpenEdit(modulo.id)}
-                                        className="
-                                            text-xs
-                                            text-blue-400
-                                            hover:text-blue-300
-                                        "
-                                    >
-                                        Editar
-                                    </button>
+                                    <div className="flex items-center gap-3">
+                                        <button
+                                            onClick={() => setModalOpenEdit(modulo.id)}
+                                            className="text-xs text-blue-400 hover:text-blue-300"
+                                        >
+                                            Editar
+                                        </button>
+
+                                        <button
+                                            onClick={() => handleDeleteModulo(modulo.id)}
+                                            className="text-xs text-red-400 hover:text-red-300"
+                                        >
+                                            Excluir
+                                        </button>
+                                    </div>
 
                                 </div>
                             ))}
@@ -151,9 +229,26 @@ export default function CursoDetalhe() {
                 {/* MATRÍCULAS */}
                 <div className="bg-zinc-900 border border-zinc-800 rounded-xl p-6">
 
-                    <h2 className="font-semibold text-zinc-100 mb-6">
-                        Alunos Matriculados
-                    </h2>
+                    <div className="flex items-center justify-between mb-6">
+                        <h2 className="font-semibold text-zinc-100">
+                            Alunos Matriculados
+                        </h2>
+
+                        <button
+                            onClick={() => setModalNovaMatricula(true)}
+                            className="
+                                text-sm
+                                bg-blue-600
+                                hover:bg-blue-500
+                                text-white
+                                px-3 py-1.5
+                                rounded-lg
+                                transition
+                            "
+                        >
+                            + Adicionar aluno
+                        </button>
+                    </div>
 
                     <div className="overflow-x-auto">
 
@@ -164,6 +259,7 @@ export default function CursoDetalhe() {
                                     <th className="text-left py-2">Aluno</th>
                                     <th className="text-left py-2">Email</th>
                                     <th className="text-left py-2">Data</th>
+                                    <th className="text-right py-2">Ações</th>
                                 </tr>
                             </thead>
 
@@ -176,6 +272,21 @@ export default function CursoDetalhe() {
                                         <td>{m.emailAluno}</td>
                                         <td>
                                             {new Date(m.data).toLocaleDateString()}
+                                        </td>
+                                        <td className="text-right">
+                                            <button
+                                                onClick={() => setModalEditarMatricula(m.id)}
+                                                className="text-xs text-blue-400 hover:text-blue-300 mr-3"
+                                            >
+                                                Editar
+                                            </button>
+
+                                            <button
+                                                onClick={() => handleDeleteMatricula(m.id)}
+                                                className="text-xs text-red-400 hover:text-red-300"
+                                            >
+                                                Excluir
+                                            </button>
                                         </td>
 
                                     </tr>
@@ -193,16 +304,39 @@ export default function CursoDetalhe() {
 
 
             {/* MODAIS */}
+            <ModalEditarCurso
+                open={modalEditarCurso}
+                onClose={() => setModalEditarCurso(false)}
+                curso={curso}
+                onUpdate={handleUpdateCurso}
+            />
+            
             <ModalNovoModulo
                 open={modalOpen}
                 onClose={() => setModalOpen(false)}
                 cursoId={cursoId}
+                onCreate={handleNovoModulo}
             />
 
             <ModalEditarModulo
                 open={modalOpenEdit}
                 onClose={() => setModalOpenEdit(null)}
-                modulo={modulos.find(m => m.id === modalOpenEdit)}
+                modulo={modulos.find(m => m.id === modalOpenEdit)!}
+                onUpdate={handleEditarModulo}
+            />
+
+            <ModalNovaMatricula
+                open={modalNovaMatricula}
+                onClose={() => setModalNovaMatricula(false)}
+                cursoId={cursoId}
+                onCreate={handleNovaMatricula}
+            />
+
+            <ModalEditarMatricula
+                open={modalEditarMatricula}
+                onClose={() => setModalEditarMatricula(null)}
+                matricula={matriculas.find(m => m.id === modalEditarMatricula)!}
+                onUpdate={handleEditarMatricula}
             />
 
         </div>

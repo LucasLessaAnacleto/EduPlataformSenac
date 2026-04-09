@@ -3,9 +3,12 @@ package com.senac.ApiEduPlataformSenac.controllers;
 import com.senac.ApiEduPlataformSenac.model.dto.ProfessorResponse;
 import com.senac.ApiEduPlataformSenac.model.entities.Professor;
 import com.senac.ApiEduPlataformSenac.model.repository.ProfessorRepository;
+import com.senac.ApiEduPlataformSenac.util.TokenUtil;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -94,5 +97,24 @@ public class ProfessorController {
         }
 
         return ResponseEntity.notFound().build();
+    }
+
+    @GetMapping("/me")
+    public ResponseEntity<?> professorLogado(HttpServletRequest request){
+        String token = request.getHeader("Authorization");
+
+        if (token == null) {
+            throw new RuntimeException("Token não informado");
+        }
+
+        Long professorId = TokenUtil.validateToken(token);
+
+        Professor professor = professorRepository.findById(professorId).orElse(null);
+
+        if(professor == null){
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        }
+        return ResponseEntity.ok(professor);
+
     }
 }

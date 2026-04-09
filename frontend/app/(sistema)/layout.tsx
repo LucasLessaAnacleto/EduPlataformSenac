@@ -6,6 +6,7 @@ import Header from "../components/Header"
 import Sidebar from "../components/Sidebar"
 import { useAuth } from "../context/AuthContext"
 import { useRouter } from "next/navigation"
+import { PesquisaProvider } from "../context/PesquisaContext"
 
 export default function SistemaLayout({
   children,
@@ -34,7 +35,9 @@ export default function SistemaLayout({
 
         <main className="flex-1 p-6 md:p-10 bg-zinc-950">
           <div className="max-w-7xl mx-auto w-full">
-            {children}
+            <PesquisaProvider>
+              {children}
+            </PesquisaProvider>
           </div>
         </main>
 
