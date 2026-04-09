@@ -1,6 +1,6 @@
 'use client'
 
-import { Usuario } from "@/app/context/AuthContext";
+import { Usuario } from "@/app/context/legado/AuthContext";
 import Link from "next/link";
 import { useParams, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";

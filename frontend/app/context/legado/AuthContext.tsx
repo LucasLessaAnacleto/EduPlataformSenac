@@ -8,6 +8,7 @@ export class Usuario {
         public id: number,
         public nome: string,
         public email: string,
+        public status: string
     ) { }
 }
 interface AuthContextType {
@@ -33,6 +34,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
                     jsonUsuario.id,
                     jsonUsuario.nome,
                     jsonUsuario.email,
+                    jsonUsuario.status
                 );
                 setUsuario(usuario);
             } catch (e) {

@@ -1,11 +1,5 @@
 package com.senac.ApiEduPlataformSenac.util;
 
-import com.senac.ApiEduPlataformSenac.model.entities.Usuario;
-import com.senac.ApiEduPlataformSenac.model.enuns.EnumStatusUsuario;
-import com.senac.ApiEduPlataformSenac.model.repository.UsuarioRepository;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
-
 import java.nio.charset.StandardCharsets;
 import java.util.Base64;
 
@@ -42,8 +36,6 @@ public class TokenUtil {
             if (System.currentTimeMillis() > expiration) {
                 throw new RuntimeException("Token expirado");
             }
-
-            // Usuario usuario = usuarioRepository.findByIdAndEmail(userId, email).orElse(null);
 
             return userId;
 

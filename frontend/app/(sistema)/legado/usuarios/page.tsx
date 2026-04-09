@@ -1,7 +1,7 @@
 'use client'
 
 import Loading from "@/app/components/Loading";
-import { Usuario } from "@/app/context/AuthContext";
+import { Usuario } from "@/app/context/legado/AuthContext";
 import { api } from "@/app/utils/api";
 import Link from "next/link";
 import { useEffect, useState } from "react";

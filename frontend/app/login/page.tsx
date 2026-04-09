@@ -38,7 +38,6 @@ export default function LoginPage() {
                 data.usuario.id,
                 data.usuario.nome,
                 data.usuario.email,
-                data.usuario.status
             );
 
             login(usuario, data.token);
