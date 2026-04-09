@@ -1,11 +1,39 @@
+import { useRouter } from "next/navigation";
+import { api } from "../utils/api";
+
 type Props = {
     open: boolean
-    onClose: () => void
+    onClose: () => void,
+    cursoId: number
 }
 
-export default function ModalNovoModulo({ open, onClose }: Props) {
+export default function ModalNovoModulo({ open, onClose, cursoId }: Props) {
+    if (!open) return null;
 
-    if (!open) return null
+    const router = useRouter();
+
+    async function handleNovoCurso(formData: FormData) {
+        const titulo = formData.get("titulo")?.toString();
+        const ordem = Number(formData.get("ordem")?.toString() || 0);
+
+        if(!titulo || !ordem) {
+            alert("Preencha todos os campos!")
+            return
+        }
+
+        const response = await api.post<Number>("/modulos", {
+            titulo,
+            ordem,
+        });
+
+        if(response.status !== 200) {
+            alert("Erro ao criar modulo!")
+            return
+        }
+        alert("Modulo criado com sucesso!");
+        router.push(`/cursos/${cursoId}`);
+    }
+
 
     return (
         <div className="
@@ -47,7 +75,7 @@ export default function ModalNovoModulo({ open, onClose }: Props) {
 
 
                 {/* Form */}
-                <form className="space-y-5">
+                <form className="space-y-5" action={handleNovoCurso}>
 
                     {/* Título */}
                     <div className="flex flex-col gap-2">
@@ -71,6 +99,7 @@ export default function ModalNovoModulo({ open, onClose }: Props) {
                                 focus:ring-2
                                 focus:ring-blue-500/30
                             "
+                            name="titulo"
                         />
 
                     </div>
@@ -98,6 +127,7 @@ export default function ModalNovoModulo({ open, onClose }: Props) {
                                 focus:ring-2
                                 focus:ring-blue-500/30
                             "
+                            name="ordem"
                         />
 
                         <span className="text-xs text-zinc-500">

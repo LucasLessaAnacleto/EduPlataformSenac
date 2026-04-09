@@ -196,6 +196,7 @@ export default function CursoDetalhe() {
             <ModalNovoModulo
                 open={modalOpen}
                 onClose={() => setModalOpen(false)}
+                cursoId={cursoId}
             />
 
             <ModalEditarModulo
