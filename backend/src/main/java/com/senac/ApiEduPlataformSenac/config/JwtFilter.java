@@ -1,5 +1,8 @@
 package com.senac.ApiEduPlataformSenac.config;
 
+import com.senac.ApiEduPlataformSenac.model.entities.Professor;
+import com.senac.ApiEduPlataformSenac.model.repository.ProfessorRepository;
+import com.senac.ApiEduPlataformSenac.model.repository.UsuarioRepository;
 import com.senac.ApiEduPlataformSenac.services.TokenService;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
@@ -17,17 +20,23 @@ public class JwtFilter extends OncePerRequestFilter {
     @Autowired
     private TokenService tokenService;
 
+    @Autowired
+    private ProfessorRepository professorRepository;
+
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
-        String path = request.getRequestURI();
+        String path   = request.getRequestURI();
+        String method = request.getMethod();
 
         // liberação de metodos
-        if(path.equals("/auth/login")
+        if(method.equals("OPTIONS")
+            || path.equals("/auth/login")
             || path.startsWith("/swagger-ui")
             || path.startsWith("/v3/api-docs")
             || path.startsWith("/webjars")
-            || path.startsWith("/swagger-resources"))
-        {
+            || path.startsWith("/swagger-resources")
+            || (path.equals("/professores") && method.equals("POST"))
+        ){
             filterChain.doFilter(request,response);
             return;
         }
@@ -43,10 +52,15 @@ public class JwtFilter extends OncePerRequestFilter {
         String token = header.replace("Bearer ","");
         var returnToken = tokenService.validarToken(token);
 
-        String username = returnToken.getSubject();
+        Professor professor = professorRepository.findByEmail(returnToken.getSubject()).orElse(null);
 
-        System.out.println("Username: "+username);
+        if(professor == null){
+            response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+            response.getWriter().write("Usuário não autorizado");
+            return;
+        }
 
+        request.setAttribute("usuario", professor);
 
         filterChain.doFilter(request, response);
     }

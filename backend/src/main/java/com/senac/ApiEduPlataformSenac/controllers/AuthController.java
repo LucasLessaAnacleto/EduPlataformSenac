@@ -58,8 +58,8 @@ public class AuthController {
 
         if (professorDb != null && professorDb.getSenha().equals(loginRequest.senha()) ) {
 
-            Long professorId = professorDb.getId();
             String email = professorDb.getEmail();
+            Long   id    = professorDb.getId();
 
             String token = tokenService.gerarToken(email);
             if(token == null){
@@ -67,7 +67,7 @@ public class AuthController {
             }
 
             LoginResponse loginResponse = new LoginResponse(token,
-                    new ProfessorResponse(professorId, professorDb.getNome(), email, professorDb.getBiografia())
+                    new ProfessorResponse(id, professorDb.getNome(), email, professorDb.getBiografia())
             );
 
             return ResponseEntity.ok(loginResponse);

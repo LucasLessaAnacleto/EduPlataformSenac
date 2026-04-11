@@ -3,12 +3,11 @@ package com.senac.ApiEduPlataformSenac.controllers;
 import com.senac.ApiEduPlataformSenac.model.dto.ProfessorResponse;
 import com.senac.ApiEduPlataformSenac.model.entities.Professor;
 import com.senac.ApiEduPlataformSenac.model.repository.ProfessorRepository;
-import com.senac.ApiEduPlataformSenac.util.TokenUtil;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -70,51 +69,50 @@ public class ProfessorController {
 
     @PutMapping("/{id}")
     @Operation(summary = "Atualizar professor", description = "Responsável por atualizar professor")
-    public ResponseEntity<?> atualizar(@PathVariable Long id, @RequestBody Professor professor){
+    public ResponseEntity<?> atualizar(@PathVariable Long id,
+                                       @RequestBody Professor professor,
+                                       @RequestAttribute("usuario") Professor usuario){
+
+        if (!usuario.getId().equals(id)) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+        }
 
         Professor professorBanco = professorRepository.findById(id).orElse(null);
 
-        if (professorBanco != null){
-
-            professorBanco.setNome(professor.getNome());
-            professorBanco.setEmail(professor.getEmail());
-            professorBanco.setBiografia(professor.getBiografia());
-
-            professorBanco.setSenha(
-                    professor.getSenha() != null ? professor.getSenha() : professorBanco.getSenha()
-            );
-
-            professorRepository.save(professorBanco);
-
-            ProfessorResponse response = new ProfessorResponse(
-                    professorBanco.getId(),
-                    professorBanco.getNome(),
-                    professorBanco.getEmail(),
-                    professorBanco.getBiografia()
-            );
-
-            return ResponseEntity.ok(response);
+        if (professorBanco == null){
+            return ResponseEntity.notFound().build();
         }
 
-        return ResponseEntity.notFound().build();
+        professorBanco.setNome(professor.getNome());
+        professorBanco.setEmail(professor.getEmail());
+        professorBanco.setBiografia(professor.getBiografia());
+
+        professorBanco.setSenha(
+                professor.getSenha() != null ? professor.getSenha() : professorBanco.getSenha()
+        );
+
+        professorRepository.save(professorBanco);
+
+        ProfessorResponse response = new ProfessorResponse(
+                professorBanco.getId(),
+                professorBanco.getNome(),
+                professorBanco.getEmail(),
+                professorBanco.getBiografia()
+        );
+
+        return ResponseEntity.ok(response);
     }
 
     @GetMapping("/me")
-    public ResponseEntity<?> professorLogado(HttpServletRequest request){
-        String token = request.getHeader("Authorization");
+    public ResponseEntity<?> professorLogado(@RequestAttribute("usuario") Professor usuario){
 
-        if (token == null) {
-            throw new RuntimeException("Token não informado");
-        }
+        ProfessorResponse response = new ProfessorResponse(
+                usuario.getId(),
+                usuario.getNome(),
+                usuario.getEmail(),
+                usuario.getBiografia()
+        );
 
-        Long professorId = TokenUtil.validateToken(token);
-
-        Professor professor = professorRepository.findById(professorId).orElse(null);
-
-        if(professor == null){
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
-        }
-        return ResponseEntity.ok(professor);
-
+        return ResponseEntity.ok(response);
     }
 }
