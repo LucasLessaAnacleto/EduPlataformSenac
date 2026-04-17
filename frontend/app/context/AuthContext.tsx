@@ -2,25 +2,21 @@
 import { createContext, ReactNode, use, useContext, useEffect, useState } from "react";
 import Cookies from "js-cookie";
 import { useRouter } from "next/navigation";
+import { Usuario } from "../types/usuario";
 
-export class Usuario {
-    constructor(
-        public id: number,
-        public nome: string,
-        public email: string,
-    ) { }
-}
 interface AuthContextType {
     usuario: Usuario | null,
-    login: (usuario: Usuario, token: string) => void,
+    login: (usuario: Usuario, tokenLogin: string) => void,
     logout: () => void,
-    loading: boolean
+    loading: boolean,
+    token: string | null
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export function AuthProvider({ children }: { children: ReactNode }) {
     const [usuario, setUsuario] = useState<Usuario | null>(null);
+    const [token, setToken] = useState<string | null>(null);
     const [loading, setLoading] = useState(true);
 
     const router = useRouter();
@@ -42,10 +38,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         setLoading(false);
     }, []);
 
-    const login = (usuario: Usuario, token: string) => {
+    const login = (usuario: Usuario, tokenLogin: string) => {
         setUsuario(usuario);
+        setToken(tokenLogin);
         Cookies.set('usuario', JSON.stringify(usuario), { expires: 7 });
-        Cookies.set('token', token, { expires: 7 });
+        Cookies.set('token', tokenLogin, { expires: 7 });
     }
     
     const logout = () => {
@@ -57,7 +54,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
     
     return (
-        <AuthContext.Provider value={{ usuario, loading, login, logout }}>
+        <AuthContext.Provider value={{ usuario, loading, login, logout, token }}>
             {children}
         </AuthContext.Provider>
     )

@@ -8,6 +8,7 @@ import Loading from "@/app/components/Loading"
 import { api } from "@/app/utils/api"
 import { Curso } from "@/app/types"
 import { usePesquisa } from "@/app/context/PesquisaContext"
+import { buscaCursos } from "@/app/services/cursoService"
 
 export default function CursosPage() {
 
@@ -19,22 +20,17 @@ export default function CursosPage() {
     const [isFocused, setIsFocused] = useState(false)
 
     useEffect(() => {
-        buscaCursos()
+        buscaDados()
     }, []);
 
     const handleNovoCurso = async(curso: Curso) => {
         setCursos(prev => [...prev, curso]);
     }
 
-    const buscaCursos = async () => {
+    const buscaDados = async () => {
         try {
-            const response = await api.get<Curso[]>("/cursos")
-
-            if (response.status !== 200) {
-                throw new Error("Erro ao buscar cursos")
-            }
-
-            setCursos(response.data)
+            const cursos = await buscaCursos();
+            setCursos(cursos)
 
         } catch (error) {
             console.error(error)
