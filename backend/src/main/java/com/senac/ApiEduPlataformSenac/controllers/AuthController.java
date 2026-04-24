@@ -6,8 +6,9 @@ import com.senac.ApiEduPlataformSenac.model.dto.ProfessorResponse;
 import com.senac.ApiEduPlataformSenac.model.dto.UsuarioResponse;
 import com.senac.ApiEduPlataformSenac.model.entities.Professor;
 import com.senac.ApiEduPlataformSenac.model.repository.ProfessorRepository;
+import com.senac.ApiEduPlataformSenac.model.repository.UsuarioRepository;
 import com.senac.ApiEduPlataformSenac.services.TokenService;
-import com.senac.ApiEduPlataformSenac.util.TokenUtil;
+import com.senac.ApiEduPlataformSenac.services.AuthService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -24,10 +25,16 @@ import org.springframework.web.bind.annotation.RestController;
 public class AuthController {
 
     @Autowired
-    private ProfessorRepository professorRepository;
+    private ProfessorRepository profssorRepository;
+
+    @Autowired
+    private UsuarioRepository usuarioRepository;
 
     @Autowired
     private TokenService tokenService;
+
+    @Autowired
+    private AuthService authService;
 
     /*
     @PostMapping("/login")
@@ -54,20 +61,19 @@ public class AuthController {
     @Operation(summary = "Fazer login", description = "Autenticar do professor")
     public ResponseEntity<?> login(@RequestBody LoginRequest loginRequest){
 
-        Professor professorDb = professorRepository.findByEmail(loginRequest.email()).orElse(null);
+        if (authService.ValidaUsuarioSenha(loginRequest)) {
+            var usuario = usuarioRepository.findAll()
+                    .stream()
+                    .filter(us -> us.getEmail().equals(loginRequest.email()))
+                    .findFirst().orElse(null);
 
-        if (professorDb != null && professorDb.getSenha().equals(loginRequest.senha()) ) {
-
-            String email = professorDb.getEmail();
-            Long   id    = professorDb.getId();
-
-            String token = tokenService.gerarToken(email);
-            if(token == null){
+            String token = tokenService.gerarToken(usuario);
+            if(token == null || usuario == null ){
                 return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
             }
 
             LoginResponse loginResponse = new LoginResponse(token,
-                    new ProfessorResponse(id, professorDb.getNome(), email, professorDb.getBiografia())
+                    new UsuarioResponse(usuario.getId(), usuario.getNome(), usuario.getEmail(), usuario.getStatus())
             );
 
             return ResponseEntity.ok(loginResponse);

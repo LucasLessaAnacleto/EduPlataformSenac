@@ -6,7 +6,7 @@ import ModalNovoCurso from "@/app/components/ModalNovoCurso"
 import CursoCard from "@/app/components/CursoCard"
 import Loading from "@/app/components/Loading"
 import { api } from "@/app/utils/api"
-import { Curso } from "@/app/types"
+import { Curso } from "@/app/types/curso"
 import { usePesquisa } from "@/app/context/PesquisaContext"
 import { buscaCursos } from "@/app/services/cursoService"
 
@@ -30,6 +30,7 @@ export default function CursosPage() {
     const buscaDados = async () => {
         try {
             const cursos = await buscaCursos();
+            console.log(cursos);
             setCursos(cursos)
 
         } catch (error) {

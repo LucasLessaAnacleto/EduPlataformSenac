@@ -4,6 +4,12 @@ import com.auth0.jwt.JWT;
 import com.auth0.jwt.JWTVerifier;
 import com.auth0.jwt.algorithms.Algorithm;
 import com.auth0.jwt.interfaces.DecodedJWT;
+import com.senac.ApiEduPlataformSenac.model.entities.Token;
+import com.senac.ApiEduPlataformSenac.model.entities.Usuario;
+import com.senac.ApiEduPlataformSenac.model.repository.ProfessorRepository;
+import com.senac.ApiEduPlataformSenac.model.repository.TokenRepository;
+import com.senac.ApiEduPlataformSenac.model.repository.UsuarioRepository;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
@@ -23,6 +29,12 @@ public class TokenService {
     @Value("${spring.tempoExpiracao}")
     private Long tempoExpiracao;
 
+    @Autowired
+    private TokenRepository tokenRepository;
+
+    @Autowired
+    private UsuarioRepository usuarioRepository;
+
     public DecodedJWT validarToken(String token){
         Algorithm algorithm = Algorithm.HMAC256(secret);
         JWTVerifier verifier = JWT.require(algorithm)
@@ -32,15 +44,16 @@ public class TokenService {
         return verifier.verify(token);
     }
 
-    public String gerarToken(String email){
+    public String gerarToken(Usuario usuario){
         try{
             Algorithm algorithm = Algorithm.HMAC256(secret);
             String token = JWT.create()
                     .withIssuer(emissor)
-                    .withSubject(email)
+                    .withSubject(usuario.getEmail())
                     .withExpiresAt(gerarDataExpiracao())
                     .sign(algorithm);
 
+            tokenRepository.save(new Token(token, usuario));
             return token;
         }catch (Exception e){
             System.out.println("Erro gerar token "+e.toString());

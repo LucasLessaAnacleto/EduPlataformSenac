@@ -8,10 +8,11 @@ export class Usuario {
  
 export interface AuthContextType {
     usuario: Usuario | null,
-    token: string | null,
-    login: (usuario: Usuario, token: string) => void,
-    logout: () => void
+    login: (usuario: Usuario, tokenLogin: string) => void,
+    logout: () => void,
+    loading: boolean
 }
+
  
 export interface UsuarioFormProps {
     usuarioExistente?: Usuario

@@ -3,14 +3,11 @@
 import { useRouter } from "next/navigation"
 import Link from "next/link"
 import Logo from "../components/Logo"
-import { useAuth, Usuario } from "../context/AuthContext"
+import { useAuth } from "../context/AuthContext"
 import { api } from "../utils/api"
 import Button from "../components/Button"
-
-interface LoginResponse {
-    token: string
-    professor: Usuario
-}
+import { LoginResponse } from "../types/Auth"
+import { Usuario } from "../types/usuario"
 
 export default function LoginPage() {
 
