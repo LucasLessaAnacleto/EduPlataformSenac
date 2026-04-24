@@ -67,7 +67,7 @@ public class AuthController {
                     .filter(us -> us.getEmail().equals(loginRequest.email()))
                     .findFirst().orElse(null);
 
-            String token = tokenService.gerarToken(usuario);
+              String token = tokenService.gerarToken(usuario);
             if(token == null || usuario == null ){
                 return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
             }
