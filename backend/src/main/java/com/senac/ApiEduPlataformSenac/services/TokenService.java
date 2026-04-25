@@ -44,16 +44,22 @@ public class TokenService {
         return verifier.verify(token);
     }
 
-    public String gerarToken(Usuario usuario){
+    public String gerarToken(String email){
         try{
             Algorithm algorithm = Algorithm.HMAC256(secret);
             String token = JWT.create()
                     .withIssuer(emissor)
-                    .withSubject(usuario.getEmail())
+                    .withSubject(email)
                     .withExpiresAt(gerarDataExpiracao())
                     .sign(algorithm);
 
+            var usuario = usuarioRepository.findAll()
+                    .stream()
+                    .filter(us -> us.getEmail().equals(email))
+                    .findFirst().orElse(null);
+
             tokenRepository.save(new Token(token, usuario));
+
             return token;
         }catch (Exception e){
             System.out.println("Erro gerar token "+e.toString());

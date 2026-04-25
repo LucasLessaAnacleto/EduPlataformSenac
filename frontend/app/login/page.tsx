@@ -39,9 +39,9 @@ export default function LoginPage() {
             const data = response.data
 
             const usuario = new Usuario(
-                data.professor.id,
-                data.professor.nome,
-                data.professor.email,
+                data.usuario.id,
+                data.usuario.nome,
+                data.usuario.email,
             )
 
             login(usuario, data.token)

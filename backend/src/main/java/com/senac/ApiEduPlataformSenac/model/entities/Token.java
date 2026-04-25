@@ -19,7 +19,6 @@ public class Token {
     private String token;
 
     @ManyToOne
-    @JoinColumn(name = "usuario_id", referencedColumnName = "id")
     private Usuario usuario;
 
     public Token(String token, Usuario usuario){

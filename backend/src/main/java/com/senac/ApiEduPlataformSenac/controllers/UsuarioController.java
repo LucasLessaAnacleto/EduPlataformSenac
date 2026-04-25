@@ -5,6 +5,7 @@ import com.senac.ApiEduPlataformSenac.model.dto.UsuarioResponse;
 import com.senac.ApiEduPlataformSenac.model.entities.Usuario;
 import com.senac.ApiEduPlataformSenac.model.enuns.EnumStatusUsuario;
 import com.senac.ApiEduPlataformSenac.model.repository.UsuarioRepository;
+import com.senac.ApiEduPlataformSenac.services.UsuarioService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -21,6 +22,8 @@ public class UsuarioController {
 
     @Autowired
     private UsuarioRepository usuarioRepository;
+    @Autowired
+    private UsuarioService usuarioService;
 
 
     @GetMapping
@@ -30,6 +33,7 @@ public class UsuarioController {
         List<UsuarioResponse> usuarios = usuarioRepository.findAll().stream().map(usuario -> new UsuarioResponse(
                 usuario.getId(),
                 usuario.getNome(),
+                usuario.getCpf(),
                 usuario.getEmail(),
                 usuario.getStatus()
         )).toList();
@@ -64,25 +68,12 @@ public class UsuarioController {
     @Operation(summary = "Atualizar usuario",description = "Resposavel por atualizar usuário")
     public ResponseEntity<?> atualizar (@PathVariable Long id, @RequestBody Usuario usuario){
 
-        Usuario usuarioBanco = usuarioRepository.findById(id).orElse(null);
-
-        if (usuarioBanco != null){
-            usuarioBanco.setEmail(usuario.getEmail());
-            usuarioBanco.setNome(usuario.getNome());
-            usuarioBanco.setSenha(
-                    usuario.getSenha() != null ? usuario.getSenha() : usuarioBanco.getSenha()
+        var usuarioAlterado = usuarioService.alterarUsuario(id, usuario);
+        if(usuarioAlterado != null){
+            return ResponseEntity.ok(
+                    new UsuarioResponse(usuarioAlterado.getId(), usuarioAlterado.getNome(), usuarioAlterado.getCpf(), usuarioAlterado.getEmail(), usuarioAlterado.getStatus())
             );
-            usuarioBanco.setStatus(
-                    usuario.getStatus() != null ? usuario.getStatus() : usuarioBanco.getStatus()
-            );
-
-            usuarioRepository.save(usuarioBanco);
-
-            UsuarioResponse usuarioResponse = new UsuarioResponse(usuarioBanco.getId(), usuarioBanco.getNome(), usuarioBanco.getEmail(), usuarioBanco.getStatus());
-
-            return ResponseEntity.ok(usuarioResponse);
         }
-
 
         return ResponseEntity.notFound().build();
     }
@@ -90,14 +81,8 @@ public class UsuarioController {
     @PutMapping("/{id}/AlterarStatus")
     @Operation(summary = "Alterar status do usuário",description = "Resposavel por ativar/inativar usuário")
     public ResponseEntity<?> alterarStatus(@PathVariable Long id, @RequestBody StatusUsuarioRequest alterarStatusUsuario){
-        Usuario usuarioBanco = usuarioRepository.findById(id).orElse(null);
-
-        if(usuarioBanco != null){
-            usuarioBanco.setStatus(alterarStatusUsuario.status());
-            usuarioRepository.save(usuarioBanco);
-            return ResponseEntity.ok().build();
-        }
-
+        usuarioService.alterarStatusUsuario(id, alterarStatusUsuario);
+        return ResponseEntity.ok().build();
         return ResponseEntity.notFound().build();
     }
 
