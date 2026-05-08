@@ -28,7 +28,7 @@ public class ProfessorController {
         List<ProfessorResponse> professores = professorRepository.findAll().stream().map(professor -> new ProfessorResponse(
                 professor.getId(),
                 professor.getNome(),
-                professor.getEmail(),
+                professor.getCpf(),
                 professor.getBiografia()
         )).toList();
 
@@ -48,7 +48,7 @@ public class ProfessorController {
         ProfessorResponse response = new ProfessorResponse(
                 professor.getId(),
                 professor.getNome(),
-                professor.getEmail(),
+                professor.getCpf(),
                 professor.getBiografia()
         );
 
@@ -61,8 +61,8 @@ public class ProfessorController {
 
         Professor novoProfessor = new Professor();
         novoProfessor.setNome(professor.getNome());
-        novoProfessor.setEmail(professor.getEmail());
-        novoProfessor.setSenha(professor.getSenha());
+        novoProfessor.setCpf(professor.getCpf());
+        novoProfessor.setBiografia(professor.getBiografia());
 
         return ResponseEntity.ok(professorRepository.save(novoProfessor).getId());
     }
@@ -84,33 +84,16 @@ public class ProfessorController {
         }
 
         professorBanco.setNome(professor.getNome());
-        professorBanco.setEmail(professor.getEmail());
         professorBanco.setBiografia(professor.getBiografia());
-
-        professorBanco.setSenha(
-                professor.getSenha() != null ? professor.getSenha() : professorBanco.getSenha()
-        );
+        // professorBanco.setCpf(professor.getCpf());
 
         professorRepository.save(professorBanco);
 
         ProfessorResponse response = new ProfessorResponse(
                 professorBanco.getId(),
                 professorBanco.getNome(),
-                professorBanco.getEmail(),
+                professorBanco.getCpf(),
                 professorBanco.getBiografia()
-        );
-
-        return ResponseEntity.ok(response);
-    }
-
-    @GetMapping("/me")
-    public ResponseEntity<?> professorLogado(@RequestAttribute("usuario") Professor usuario){
-
-        ProfessorResponse response = new ProfessorResponse(
-                usuario.getId(),
-                usuario.getNome(),
-                usuario.getEmail(),
-                usuario.getBiografia()
         );
 
         return ResponseEntity.ok(response);
