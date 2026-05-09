@@ -2,7 +2,6 @@ package com.senac.ApiEduPlataformSenac.config;
 
 import com.senac.ApiEduPlataformSenac.model.entities.Professor;
 import com.senac.ApiEduPlataformSenac.model.repository.ProfessorRepository;
-import com.senac.ApiEduPlataformSenac.model.repository.UsuarioRepository;
 import com.senac.ApiEduPlataformSenac.services.TokenService;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;

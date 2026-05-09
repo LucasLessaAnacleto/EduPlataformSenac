@@ -7,23 +7,21 @@ import lombok.*;
 
 @Getter
 @Setter
-@NoArgsConstructor
 @AllArgsConstructor
-
+@NoArgsConstructor
 @Entity
-@Table(name = "usuario")
-public class Usuario {
+public class Usuario{
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
     private String nome;
 
-    private String cpf;
-
     private String email;
 
     private String senha;
+
+    private String role;
 
     private EnumStatusUsuario status = EnumStatusUsuario.ATIVO;
 }

@@ -33,7 +33,6 @@ public class UsuarioController {
         List<UsuarioResponse> usuarios = usuarioRepository.findAll().stream().map(usuario -> new UsuarioResponse(
                 usuario.getId(),
                 usuario.getNome(),
-                usuario.getCpf(),
                 usuario.getEmail(),
                 usuario.getStatus()
         )).toList();
@@ -71,7 +70,7 @@ public class UsuarioController {
         var usuarioAlterado = usuarioService.alterarUsuario(id, usuario);
         if(usuarioAlterado != null){
             return ResponseEntity.ok(
-                    new UsuarioResponse(usuarioAlterado.getId(), usuarioAlterado.getNome(), usuarioAlterado.getCpf(), usuarioAlterado.getEmail(), usuarioAlterado.getStatus())
+                    new UsuarioResponse(usuarioAlterado.getId(), usuarioAlterado.getNome(), usuarioAlterado.getEmail(), usuarioAlterado.getStatus())
             );
         }
 
@@ -83,7 +82,7 @@ public class UsuarioController {
     public ResponseEntity<?> alterarStatus(@PathVariable Long id, @RequestBody StatusUsuarioRequest alterarStatusUsuario){
         usuarioService.alterarStatusUsuario(id, alterarStatusUsuario);
         return ResponseEntity.ok().build();
-        return ResponseEntity.notFound().build();
+        // return ResponseEntity.notFound().build();
     }
 
 }
