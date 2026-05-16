@@ -63,6 +63,18 @@ public class UsuarioController {
         return ResponseEntity.ok(usuarioRepository.save(novoUsuario).getId());
     }
 
+    @PostMapping("/adm")
+    @Operation(summary = "Criar usuario Administrador",description = "Resposavel por criar um usuário admin")
+    public ResponseEntity<?> salvarAdmin (@RequestBody Usuario usuario){
+        Usuario novoUsuario = new Usuario();
+        novoUsuario.setNome(usuario.getNome());
+        novoUsuario.setEmail(usuario.getEmail());
+        novoUsuario.setSenha(usuario.getSenha());
+        novoUsuario.setStatus(EnumStatusUsuario.ATIVO);
+
+        return ResponseEntity.ok(usuarioRepository.save(novoUsuario).getId());
+    }
+
     @PutMapping("/{id}")
     @Operation(summary = "Atualizar usuario",description = "Resposavel por atualizar usuário")
     public ResponseEntity<?> atualizar (@PathVariable Long id, @RequestBody Usuario usuario){

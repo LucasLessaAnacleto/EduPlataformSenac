@@ -3,10 +3,11 @@
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
 
-
-<AnchorPane prefHeight="400.0" prefWidth="600.0" xmlns="http://javafx.com/javafx/17.0.12" xmlns:fx="http://javafx.com/fxml/1" fx:controller="CONTROLLER_NAME">
+<AnchorPane prefHeight="400.0" prefWidth="600.0" xmlns="http://javafx.com/javafx/17.0.12" xmlns:fx="http://javafx.com/fxml/1"
+            fx:controller="com.example.desktop.controllers.MenuController">
    <children>
-      <Button layoutX="110.0" layoutY="124.0" mnemonicParsing="false" text="Cadastro Usuario" />
-      <Button layoutX="247.0" layoutY="124.0" mnemonicParsing="false" prefHeight="25.0" prefWidth="107.0" text="Consulta Usuario" />
+      <Button layoutX="187.0" layoutY="124.0" mnemonicParsing="false" prefHeight="25.0" prefWidth="220.0" text="Cadastro Usuario" onAction="#onIrParaCadastroUsuario" />
+<!--      <Button layoutX="187.0" layoutY="175.0" mnemonicParsing="false" prefHeight="25.0" prefWidth="226.0" text="Consulta Usuario" />-->
+      <Button layoutX="14.0" layoutY="351.0" mnemonicParsing="false" prefHeight="25.0" prefWidth="97.0" text="Voltar" onAction="#onVoltarButtonClick" />
    </children>
 </AnchorPane>
