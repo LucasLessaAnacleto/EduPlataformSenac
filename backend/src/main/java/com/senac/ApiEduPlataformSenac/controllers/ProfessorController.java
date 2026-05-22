@@ -27,7 +27,7 @@ public class ProfessorController {
 
         List<ProfessorResponse> professores = professorRepository.findAll().stream().map(professor -> new ProfessorResponse(
                 professor.getId(),
-                professor.getNome(),
+                professor.getUsuario().getNome(),
                 professor.getCpf(),
                 professor.getBiografia()
         )).toList();
@@ -47,7 +47,7 @@ public class ProfessorController {
 
         ProfessorResponse response = new ProfessorResponse(
                 professor.getId(),
-                professor.getNome(),
+                professor.getUsuario().getNome(),
                 professor.getCpf(),
                 professor.getBiografia()
         );
@@ -60,7 +60,7 @@ public class ProfessorController {
     public ResponseEntity<?> salvar(@RequestBody Professor professor){
 
         Professor novoProfessor = new Professor();
-        novoProfessor.setNome(professor.getNome());
+//        novoProfessor.setUsuario(professor.getNome());
         novoProfessor.setCpf(professor.getCpf());
         novoProfessor.setBiografia(professor.getBiografia());
 
@@ -83,7 +83,7 @@ public class ProfessorController {
             return ResponseEntity.notFound().build();
         }
 
-        professorBanco.setNome(professor.getNome());
+//        professorBanco.setNome(professor.getNome());
         professorBanco.setBiografia(professor.getBiografia());
         // professorBanco.setCpf(professor.getCpf());
 
@@ -91,7 +91,7 @@ public class ProfessorController {
 
         ProfessorResponse response = new ProfessorResponse(
                 professorBanco.getId(),
-                professorBanco.getNome(),
+                professorBanco.getUsuario().getNome(),
                 professorBanco.getCpf(),
                 professorBanco.getBiografia()
         );

@@ -92,7 +92,7 @@ public class UsuarioController {
     @PutMapping("/{id}/AlterarStatus")
     @Operation(summary = "Alterar status do usuário",description = "Resposavel por ativar/inativar usuário")
     public ResponseEntity<?> alterarStatus(@PathVariable Long id, @RequestBody StatusUsuarioRequest alterarStatusUsuario){
-        usuarioService.alterarStatusUsuario(id, alterarStatusUsuario);
+//        usuarioService.alterarStatusUsuario(id, alterarStatusUsuario);
         return ResponseEntity.ok().build();
         // return ResponseEntity.notFound().build();
     }

@@ -12,11 +12,12 @@ public class UsuarioService {
     @Autowired
     public UsuarioRepository usuarioRepository;
 
-    public boolean ValidaUsuarioSenha(LoginRequest loginRequest) {
+    public boolean validaUsuarioSenha(LoginRequest loginRequest) {
         try{
             return usuarioRepository.existsByEmailAndSenha(loginRequest.email(), loginRequest.senha());
         } catch (Exception e) {
-            throw new RuntimeException(e);
+            System.out.println(e.toString());
+            return false;
         }
     }
 
@@ -43,7 +44,7 @@ public class UsuarioService {
 
     }
 
-    public void alterarStatusUsuario(Long id, StatusUsuarioRequest alterarStatusUsuario) {
-        
-    }
+//    public void alterarStatusUsuario(Long id, StatusUsuarioRequest alterarStatusUsuario) {
+//
+//    }
 }

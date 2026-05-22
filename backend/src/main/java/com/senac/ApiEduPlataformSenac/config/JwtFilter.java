@@ -1,13 +1,16 @@
 package com.senac.ApiEduPlataformSenac.config;
 
 import com.senac.ApiEduPlataformSenac.model.entities.Professor;
-import com.senac.ApiEduPlataformSenac.model.repository.ProfessorRepository;
+import com.senac.ApiEduPlataformSenac.model.entities.Usuario;
+import com.senac.ApiEduPlataformSenac.model.repository.UsuarioRepository;
 import com.senac.ApiEduPlataformSenac.services.TokenService;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
@@ -20,7 +23,7 @@ public class JwtFilter extends OncePerRequestFilter {
     private TokenService tokenService;
 
     @Autowired
-    private ProfessorRepository professorRepository;
+    private UsuarioRepository usuarioRepository;
 
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
@@ -50,17 +53,20 @@ public class JwtFilter extends OncePerRequestFilter {
         } // verificar se vai dar erro na ordem
 
         String token = header.replace("Bearer ","");
-        var returnToken = tokenService.validarToken(token);
+        var decodedToken = tokenService.validarToken(token);
 
-        Professor professor = professorRepository.findByEmail(returnToken.getSubject()).orElse(null);
+        String email = decodedToken.getSubject();
+        Usuario usuarioLogado = usuarioRepository.findByEmail(email).orElse(null);
+        if(usuarioLogado != null){
+            UsernamePasswordAuthenticationToken usuario = new UsernamePasswordAuthenticationToken(
+                    usuarioLogado,
+                    null,
+                    usuarioLogado.getAuthorities()
+            );
 
-        if(professor == null){
-            response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
-            response.getWriter().write("Usuário não autorizado");
-            return;
+            SecurityContextHolder.getContext().setAuthentication(usuario);
         }
 
-        request.setAttribute("usuario", professor);
 
         filterChain.doFilter(request, response);
     }

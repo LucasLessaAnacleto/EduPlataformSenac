@@ -19,54 +19,27 @@ import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequestMapping("/auth")
-@Tag(name = "Autenticação controller", description = "Responsavel por autenticar os usuários!")
+@Tag(description = "Serviço responsavel por controlar a autenticação de usuarios e sessão!",name = "Serviço autenticação")
 public class AuthController {
-
-    @Autowired
-    private ProfessorRepository profssorRepository;
-
-    @Autowired
-    private UsuarioRepository usuarioRepository;
 
     @Autowired
     private TokenService tokenService;
 
     @Autowired
-    private UsuarioService authService;
-
-    /*
-    @PostMapping("/login")
-    @Operation(summary = "Fazer login", description = "Autenticar do professor")
-    public ResponseEntity<?> login(@RequestBody LoginRequest loginRequest){
-
-        Professor professorDb = professorRepository.findByEmail(loginRequest.email()).orElse(null);
-
-        if (professorDb != null && professorDb.getSenha().equals(loginRequest.senha()) ) {
-
-            Long professorId = professorDb.getId();
-            String email = professorDb.getEmail();
-
-            LoginResponse loginResponse = new LoginResponse(TokenUtil.generateToken(professorId, email),
-                    new ProfessorResponse(professorId, professorDb.getNome(), email, professorDb.getBiografia())
-            );
-
-            return ResponseEntity.ok(loginResponse);
-        }
-        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
-    }*/
+    private UsuarioService usuarioService;
 
     @PostMapping("/login")
-    @Operation(summary = "Fazer login", description = "Autenticar do professor")
+    @Operation(description = "Autentica usuario e senha!",summary = "Login")
     public ResponseEntity<?> login(@RequestBody LoginRequest loginRequest){
 
-        if (authService.ValidaUsuarioSenha(loginRequest)) {
+
+        if(usuarioService.validaUsuarioSenha(loginRequest)){
+
             String token = tokenService.gerarToken(loginRequest.email());
-            if(token == null){
-                return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
-            }
 
             return ResponseEntity.ok(new LoginResponse(token));
         }
+
         return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
     }
 
