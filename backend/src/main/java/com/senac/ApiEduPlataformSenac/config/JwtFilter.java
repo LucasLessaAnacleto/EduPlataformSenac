@@ -27,46 +27,37 @@ public class JwtFilter extends OncePerRequestFilter {
 
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
-        String path   = request.getRequestURI();
-        String method = request.getMethod();
-
-        // liberação de metodos
-        if(method.equals("OPTIONS")
-            || path.equals("/auth/login")
-            || path.startsWith("/swagger-ui")
-            || path.startsWith("/v3/api-docs")
-            || path.startsWith("/webjars")
-            || path.startsWith("/swagger-resources")
-            || (path.equals("/professores") && method.equals("POST"))
-            || (path.equals("/usuario/adm") && method.equals("POST"))
-        ){
-            filterChain.doFilter(request,response);
-            return;
-        }
-
         String header = request.getHeader("Authorization");
 
-        if(header == null || !header.startsWith("Bearer ")){
-            response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
-            response.getWriter().write("Token não informado ou invalido");
-            return;
-        } // verificar se vai dar erro na ordem
+        if(header != null && header.startsWith("Bearer ")) {
 
-        String token = header.replace("Bearer ","");
-        var decodedToken = tokenService.validarToken(token);
+            String token = header.replace("Bearer ", "");
 
-        String email = decodedToken.getSubject();
-        Usuario usuarioLogado = usuarioRepository.findByEmail(email).orElse(null);
-        if(usuarioLogado != null){
-            UsernamePasswordAuthenticationToken usuario = new UsernamePasswordAuthenticationToken(
-                    usuarioLogado,
-                    null,
-                    usuarioLogado.getAuthorities()
-            );
+            var decodedToken = tokenService.validarToken(token);
 
-            SecurityContextHolder.getContext().setAuthentication(usuario);
+            if(decodedToken != null){
+
+                String email = decodedToken.getSubject();
+
+                Usuario usuarioLogado = usuarioRepository
+                        .findByEmail(email)
+                        .orElse(null);
+
+                if(usuarioLogado != null){
+
+                    UsernamePasswordAuthenticationToken authentication =
+                            new UsernamePasswordAuthenticationToken(
+                                    usuarioLogado,
+                                    null,
+                                    usuarioLogado.getAuthorities()
+                            );
+
+                    SecurityContextHolder
+                            .getContext()
+                            .setAuthentication(authentication);
+                }
+            }
         }
-
 
         filterChain.doFilter(request, response);
     }

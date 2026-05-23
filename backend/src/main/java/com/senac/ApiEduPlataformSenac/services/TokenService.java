@@ -47,7 +47,7 @@ public class TokenService {
     public String gerarToken(String email){
         try{
             Algorithm algorithm = Algorithm.HMAC256(secret);
-            String token = JWT.create()
+            String tokenContent = JWT.create()
                     .withIssuer(emissor)
                     .withSubject(email)
                     .withExpiresAt(gerarDataExpiracao())
@@ -58,9 +58,9 @@ public class TokenService {
                     .filter(us -> us.getEmail().equals(email))
                     .findFirst().orElse(null);
 
-            tokenRepository.save(new Token(token, usuario));
+            tokenRepository.save(new Token(tokenContent, usuario));
 
-            return token;
+            return tokenContent;
         }catch (Exception e){
             System.out.println("Erro gerar token "+e.toString());
             return null;

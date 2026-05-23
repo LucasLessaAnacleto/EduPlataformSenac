@@ -34,7 +34,8 @@ public class UsuarioController {
                 usuario.getId(),
                 usuario.getNome(),
                 usuario.getEmail(),
-                usuario.getStatus()
+                usuario.getStatus(),
+                usuario.getRole()
         )).toList();
         return ResponseEntity.ok(usuarios);
     }
@@ -47,7 +48,7 @@ public class UsuarioController {
         if(usuario == null){
             return ResponseEntity.ok(null);
         }
-        UsuarioResponse usuarioResponse = new UsuarioResponse(usuario.getId(), usuario.getNome(), usuario.getEmail(), usuario.getStatus());
+        UsuarioResponse usuarioResponse = new UsuarioResponse(usuario.getId(), usuario.getNome(), usuario.getEmail(), usuario.getStatus(), usuario.getRole());
         return ResponseEntity.ok(usuarioResponse);
     }
 
@@ -82,7 +83,7 @@ public class UsuarioController {
         var usuarioAlterado = usuarioService.alterarUsuario(id, usuario);
         if(usuarioAlterado != null){
             return ResponseEntity.ok(
-                    new UsuarioResponse(usuarioAlterado.getId(), usuarioAlterado.getNome(), usuarioAlterado.getEmail(), usuarioAlterado.getStatus())
+                    new UsuarioResponse(usuarioAlterado.getId(), usuarioAlterado.getNome(), usuarioAlterado.getEmail(), usuarioAlterado.getStatus(), usuario.getRole())
             );
         }
 

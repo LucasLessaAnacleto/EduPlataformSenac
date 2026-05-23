@@ -11,9 +11,9 @@ import lombok.Setter;
 @Setter
 @Getter
 @Entity
-@Table(name = "token")
 public class Token {
     @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
     private String token;
