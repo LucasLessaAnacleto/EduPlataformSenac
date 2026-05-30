@@ -28,18 +28,20 @@ public class UsuarioController {
 
     @GetMapping
     @Operation(summary = "Listar todos",description = "Listar todos os usuários!")
-    public ResponseEntity<?> listarTodos(){
+    public ResponseEntity<?> listarTodos() {
 
-        List<UsuarioResponse> usuarios = usuarioRepository.findAll().stream().map(usuario -> new UsuarioResponse(
-                usuario.getId(),
-                usuario.getNome(),
-                usuario.getEmail(),
-                usuario.getStatus(),
-                usuario.getRole()
-        )).toList();
+        List<UsuarioResponse> usuarios = usuarioService.listarTodos()
+                .stream()
+                .map(usuario -> new UsuarioResponse(
+                        usuario.getId(),
+                        usuario.getNome(),
+                        usuario.getEmail(),
+                        usuario.getStatus(),
+                        usuario.getRole()
+                ))
+                .toList();
         return ResponseEntity.ok(usuarios);
     }
-
 
     @GetMapping("/{id}")
     @Operation(summary = "Consulta de usuario por ID", description = "Responsavel por consultar um unico usuario por ID e se não existir retorna null!")
