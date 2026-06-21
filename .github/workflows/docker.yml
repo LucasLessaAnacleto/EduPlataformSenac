@@ -29,9 +29,13 @@ jobs:
       - name: 🩺 Verificar status dos contêineres
         working-directory: ./backend
         run: |
-          docker compose ps
-          docker compose logs db || echo "Serviço 'db' não encontrado."
-          docker compose logs api || echo "Serviço 'api' não encontrado."
+          docker compose 
+          docker compose logs postgres-db
+          docker compose logs api-spring
+
+      - name: 🔍 Ver TODOS os logs
+        working-directory: ./backend
+        run: docker compose logs
 
       - name: 📞 Realizar teste de saúde na API
         run: curl --fail http://localhost:8080/swagger-ui/index.html
