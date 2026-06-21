@@ -5,9 +5,12 @@ services:
     ports:
       - "5432:5432"
     environment:
-      - POSTGRES_USER=postgres
-      - POSTGRES_PASSWORD=123456
-      - POSTGRES_DB=aulafull
+      - POSTGRES_USER: postgres
+      - POSTGRES_PASSWORD: 123456
+      - POSTGRES_DB: aulafull
+      - SPRING_SECRETKEY: awjidauwdaaid87231dcahbsurnasxvcb34d
+      - SPRING_EMISSOR: ajdawijd416ll
+      - SPRING_TEMPOEXPIRACAO: 30
     volumes:
       - postgres-data-local:/var/lib/postgresql/data
 
@@ -17,9 +20,9 @@ services:
     ports:
       - "8080:8080"
     environment:
-      - SPRING_DATASOURCE_URL=jdbc:postgresql://postgres-db:5432/aulafull
-      - SPRING_DATASOURCE_USERNAME=postgres
-      - SPRING_DATASOURCE_PASSWORD=123456
+      - SPRING_DATASOURCE_URL: jdbc:postgresql://postgres-db:5432/aulafull
+      - SPRING_DATASOURCE_USERNAME: postgres
+      - SPRING_DATASOURCE_PASSWORD: 123456
     depends_on:
       - postgres-db
 
