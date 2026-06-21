@@ -19,7 +19,7 @@ jobs:
 
       - name: 🐋 Subir ambiente com Docker Compose
         working-directory: ./backend
-        run: docker compose up -d
+        run: docker compose up -d --build
 
       - name: ⏱️ Aguardar os contêineres estabilizarem
         run: |
