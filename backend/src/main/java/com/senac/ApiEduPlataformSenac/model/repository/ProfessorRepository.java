@@ -8,4 +8,7 @@ import java.util.Optional;
 
 @Repository
 public interface ProfessorRepository extends JpaRepository<Professor, Long> {
+    Optional<Professor> findByUsuarioId(Long usuarioId);
+
+    boolean existsByUsuarioId(Long usuarioId);
 }

@@ -1,13 +1,14 @@
 package com.senac.ApiEduPlataformSenac.controllers;
 
-import com.senac.ApiEduPlataformSenac.model.entities.Curso;
-import com.senac.ApiEduPlataformSenac.model.entities.Professor;
-import com.senac.ApiEduPlataformSenac.model.repository.CursoRepository;
+import com.senac.ApiEduPlataformSenac.model.dto.CursoRequest;
+import com.senac.ApiEduPlataformSenac.model.dto.CursoResponse;
+import com.senac.ApiEduPlataformSenac.services.CursoService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -15,73 +16,105 @@ import java.util.List;
 @CrossOrigin("*")
 @RestController
 @RequestMapping("/cursos")
-@Tag(name = "Cursos controller", description = "Responsavel por gerenciar os cursos!")
+@Tag(name = "Cursos controller", description = "Responsável por gerenciar os cursos")
 public class CursoController {
 
     @Autowired
-    private CursoRepository cursoRepository;
+    private CursoService cursoService;
 
     @GetMapping
-    @Operation(summary = "Listar cursos", description = "Listar cursos do professor logado")
-    public ResponseEntity<?> listarTodos(@RequestAttribute("usuario") Professor usuario){
+    @Operation(summary = "Listar cursos", description = "Lista cursos do professor logado")
+    public ResponseEntity<List<CursoResponse>> listarTodos(Authentication authentication) {
+        try {
+            return ResponseEntity.ok(cursoService.listarTodos(authentication));
 
-        List<Curso> cursos = cursoRepository.findAllByProfessorId(usuario.getId());
-
-        return ResponseEntity.ok(cursos);
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
+        }
     }
 
     @GetMapping("/{id}")
-    @Operation(summary = "Buscar curso por ID", description = "Apenas o professor dono pode visualizar")
-    public ResponseEntity<?> buscarPorId(@PathVariable Long id, @RequestAttribute("usuario") Professor usuario){
+    @Operation(summary = "Buscar curso por ID", description = "Busca um curso do professor logado")
+    public ResponseEntity<CursoResponse> buscarPorId(
+            @PathVariable Long id,
+            Authentication authentication
+    ) {
+        try {
+            return ResponseEntity.ok(cursoService.buscarPorId(id, authentication));
 
-        Curso curso = cursoRepository.findById(id).orElse(null);
+        } catch (Exception e) {
+            if (e.getMessage().equals("CURSO_NAO_ENCONTRADO")) {
+                return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+            }
 
-        if (curso == null) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+            if (e.getMessage().equals("SEM_PERMISSAO")) {
+                return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+            }
+
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
         }
-
-        if (!curso.getProfessor().getId().equals(usuario.getId())) {
-            return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
-        }
-
-        return ResponseEntity.ok(curso);
     }
 
     @PostMapping
-    @Operation(summary = "Criar curso", description = "Criar curso vinculado ao professor logado")
-    public ResponseEntity<?> salvar(@RequestBody Curso curso,@RequestAttribute("usuario") Professor usuario){
+    @Operation(summary = "Criar curso", description = "Cria um curso vinculado ao professor logado")
+    public ResponseEntity<CursoResponse> salvar(
+            @RequestBody CursoRequest cursoRequest,
+            Authentication authentication
+    ) {
+        try {
+            CursoResponse cursoSalvo = cursoService.salvar(cursoRequest, authentication);
 
-        Curso novoCurso = new Curso();
-        novoCurso.setTitulo(curso.getTitulo());
-        novoCurso.setDescricao(curso.getDescricao());
-        novoCurso.setPreco(curso.getPreco());
-        novoCurso.setProfessor(usuario);
+            return ResponseEntity.ok(cursoSalvo);
 
-        return ResponseEntity.ok(cursoRepository.save(novoCurso).getId());
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
+        }
     }
 
     @PutMapping("/{id}")
-    @Operation(summary = "Atualizar curso", description = "Apenas o professor dono pode atualizar")
-    public ResponseEntity<?> atualizar(@PathVariable Long id,
-                                       @RequestBody Curso curso,
-                                       @RequestAttribute("usuario") Professor usuario){
+    @Operation(summary = "Atualizar curso", description = "Atualiza um curso do professor logado")
+    public ResponseEntity<CursoResponse> atualizar(
+            @PathVariable Long id,
+            @RequestBody CursoRequest cursoRequest,
+            Authentication authentication
+    ) {
+        try {
+            return ResponseEntity.ok(cursoService.atualizar(id, cursoRequest, authentication));
 
-        Curso cursoBanco = cursoRepository.findById(id).orElse(null);
+        } catch (Exception e) {
+            if (e.getMessage().equals("CURSO_NAO_ENCONTRADO")) {
+                return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+            }
 
-        if (cursoBanco == null) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+            if (e.getMessage().equals("SEM_PERMISSAO")) {
+                return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+            }
+
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
         }
+    }
 
-        if (!cursoBanco.getProfessor().equals(usuario)) {
-            return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+    @DeleteMapping("/{id}")
+    @Operation(summary = "Deletar curso", description = "Deleta um curso do professor logado")
+    public ResponseEntity<Void> deletar(
+            @PathVariable Long id,
+            Authentication authentication
+    ) {
+        try {
+            cursoService.deletar(id, authentication);
+
+            return ResponseEntity.ok().build();
+
+        } catch (Exception e) {
+            if (e.getMessage().equals("CURSO_NAO_ENCONTRADO")) {
+                return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+            }
+
+            if (e.getMessage().equals("SEM_PERMISSAO")) {
+                return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+            }
+
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
         }
-
-        cursoBanco.setTitulo(curso.getTitulo());
-        cursoBanco.setDescricao(curso.getDescricao());
-        cursoBanco.setPreco(curso.getPreco());
-
-        cursoRepository.save(cursoBanco);
-
-        return ResponseEntity.ok(cursoBanco);
     }
 }

@@ -10,6 +10,7 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -34,7 +35,6 @@ public class UsuarioController {
                 .stream()
                 .map(usuario -> new UsuarioResponse(
                         usuario.getId(),
-                        usuario.getNome(),
                         usuario.getEmail(),
                         usuario.getStatus(),
                         usuario.getRole()
@@ -50,7 +50,7 @@ public class UsuarioController {
         if(usuario == null){
             return ResponseEntity.ok(null);
         }
-        UsuarioResponse usuarioResponse = new UsuarioResponse(usuario.getId(), usuario.getNome(), usuario.getEmail(), usuario.getStatus(), usuario.getRole());
+        UsuarioResponse usuarioResponse = new UsuarioResponse(usuario.getId(), usuario.getEmail(), usuario.getStatus(), usuario.getRole());
         return ResponseEntity.ok(usuarioResponse);
     }
 
@@ -58,7 +58,6 @@ public class UsuarioController {
     @Operation(summary = "Criar usuario",description = "Resposavel por criar usuário")
     public ResponseEntity<?> salvar (@RequestBody Usuario usuario){
         Usuario novoUsuario = new Usuario();
-        novoUsuario.setNome(usuario.getNome());
         novoUsuario.setEmail(usuario.getEmail());
         novoUsuario.setSenha(usuario.getSenha());
         novoUsuario.setStatus(EnumStatusUsuario.ATIVO);
@@ -70,7 +69,6 @@ public class UsuarioController {
     @Operation(summary = "Criar usuario Administrador",description = "Resposavel por criar um usuário admin")
     public ResponseEntity<?> salvarAdmin (@RequestBody Usuario usuario){
         Usuario novoUsuario = new Usuario();
-        novoUsuario.setNome(usuario.getNome());
         novoUsuario.setEmail(usuario.getEmail());
         novoUsuario.setSenha(usuario.getSenha());
         novoUsuario.setStatus(EnumStatusUsuario.ATIVO);
@@ -85,7 +83,7 @@ public class UsuarioController {
         var usuarioAlterado = usuarioService.alterarUsuario(id, usuario);
         if(usuarioAlterado != null){
             return ResponseEntity.ok(
-                    new UsuarioResponse(usuarioAlterado.getId(), usuarioAlterado.getNome(), usuarioAlterado.getEmail(), usuarioAlterado.getStatus(), usuario.getRole())
+                    new UsuarioResponse(usuarioAlterado.getId(), usuarioAlterado.getEmail(), usuarioAlterado.getStatus(), usuario.getRole())
             );
         }
 
@@ -94,10 +92,14 @@ public class UsuarioController {
 
     @PutMapping("/{id}/AlterarStatus")
     @Operation(summary = "Alterar status do usuário",description = "Resposavel por ativar/inativar usuário")
-    public ResponseEntity<?> alterarStatus(@PathVariable Long id, @RequestBody StatusUsuarioRequest alterarStatusUsuario){
-//        usuarioService.alterarStatusUsuario(id, alterarStatusUsuario);
-        return ResponseEntity.ok().build();
-        // return ResponseEntity.notFound().build();
+    public void alterarStatus(@PathVariable Long id, @RequestBody StatusUsuarioRequest alterarStatusUsuario){
+        usuarioService.alterarStatusUsuario(id, alterarStatusUsuario);
+    }
+
+    @GetMapping("/usuariologado")
+    @Operation(summary = "Consulta usuario logado", description = "Busca usuário da sessão")
+    public ResponseEntity<UsuarioResponse> buscarUsuarioLogado(Authentication authentication) {
+        return ResponseEntity.ok(usuarioService.buscarUsuarioLogado(authentication));
     }
 
 }

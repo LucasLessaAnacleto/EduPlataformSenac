@@ -1,124 +1,122 @@
 package com.senac.ApiEduPlataformSenac.controllers;
 
 import com.senac.ApiEduPlataformSenac.model.dto.ModuloRequest;
-import com.senac.ApiEduPlataformSenac.model.entities.Curso;
-import com.senac.ApiEduPlataformSenac.model.entities.Modulo;
-import com.senac.ApiEduPlataformSenac.model.entities.Professor;
-import com.senac.ApiEduPlataformSenac.model.repository.CursoRepository;
-import com.senac.ApiEduPlataformSenac.model.repository.ModuloRepository;
+import com.senac.ApiEduPlataformSenac.model.dto.ModuloResponse;
+import com.senac.ApiEduPlataformSenac.services.ModuloService;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.Comparator;
 import java.util.List;
 
 @CrossOrigin(origins = "*")
 @RestController
 @RequestMapping
+@Tag(name = "Modulo controller", description = "Responsável por gerenciar os módulos")
 public class ModuloController {
 
     @Autowired
-    private ModuloRepository moduloRepository;
-
-    @Autowired
-    private CursoRepository cursoRepository;
+    private ModuloService moduloService;
 
     @GetMapping("/cursos/{cursoId}/modulos")
     @Operation(summary = "Listar módulos do curso", description = "Valida professor dono e ordena por ordem")
-    public ResponseEntity<?> listarPorCurso(@PathVariable Long cursoId,@RequestAttribute("usuario") Professor usuario){
+    public ResponseEntity<List<ModuloResponse>> listarPorCurso(
+            @PathVariable Long cursoId,
+            Authentication authentication
+    ) {
+        try {
+            return ResponseEntity.ok(moduloService.listarPorCurso(cursoId, authentication));
 
-        Curso curso = cursoRepository.findById(cursoId).orElse(null);
+        } catch (Exception e) {
+            if ("CURSO_NAO_ENCONTRADO".equals(e.getMessage())) {
+                return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+            }
 
-        if (curso == null) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+            if ("SEM_PERMISSAO".equals(e.getMessage())) {
+                return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+            }
+
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
         }
-
-        if (!curso.getProfessor().getId().equals(usuario.getId())) {
-            return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
-        }
-
-        List<Modulo> modulos = moduloRepository.findAllByCursoId(cursoId)
-                .stream()
-                .sorted(Comparator.comparing(Modulo::getOrdem))
-                .toList();
-
-        return ResponseEntity.ok(modulos);
     }
 
     @PostMapping("/modulos")
     @Operation(summary = "Criar módulo", description = "Recebe cursoId e valida professor dono")
-    public ResponseEntity<?> salvar(@RequestBody ModuloRequest requestDto,@RequestAttribute("usuario") Professor usuario){
-
-        Long cursoId;
+    public ResponseEntity<Long> salvar(
+            @RequestBody ModuloRequest request,
+            Authentication authentication
+    ) {
         try {
-            cursoId = requestDto.cursoId();
+            return ResponseEntity.ok(moduloService.salvar(request, authentication));
+
         } catch (Exception e) {
-            return ResponseEntity.badRequest().body("CursoId deve ser informado!");
+            if ("CURSO_NAO_ENCONTRADO".equals(e.getMessage())) {
+                return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+            }
+
+            if ("SEM_PERMISSAO".equals(e.getMessage())) {
+                return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+            }
+
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
         }
-
-        Curso curso = cursoRepository.findById(cursoId).orElse(null);
-
-        if (curso == null) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
-        }
-
-        if (!curso.getProfessor().getId().equals(usuario.getId())) {
-            return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
-        }
-
-        Modulo modulo = new Modulo();
-        modulo.setTitulo(requestDto.titulo());
-        modulo.setOrdem(requestDto.ordem());
-        modulo.setCurso(curso);
-
-        return ResponseEntity.ok(moduloRepository.save(modulo).getId());
     }
 
     @PutMapping("/modulos/{id}")
     @Operation(summary = "Atualizar módulo", description = "Valida professor dono e não permite alterar curso")
-    public ResponseEntity<?> atualizar(@PathVariable Long id,@RequestBody ModuloRequest requestDto,@RequestAttribute("usuario") Professor usuario){
+    public ResponseEntity<ModuloResponse> atualizar(
+            @PathVariable Long id,
+            @RequestBody ModuloRequest request,
+            Authentication authentication
+    ) {
+        try {
+            return ResponseEntity.ok(moduloService.atualizar(id, request, authentication));
 
-        Modulo moduloBanco = moduloRepository.findById(id).orElse(null);
+        } catch (Exception e) {
+            if ("MODULO_NAO_ENCONTRADO".equals(e.getMessage())) {
+                return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+            }
 
-        if (moduloBanco == null) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+            if ("CURSO_NAO_ENCONTRADO".equals(e.getMessage())) {
+                return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+            }
+
+            if ("SEM_PERMISSAO".equals(e.getMessage())) {
+                return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+            }
+
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
         }
-
-        Curso curso = moduloBanco.getCurso();
-
-        if (!curso.getProfessor().getId().equals(usuario.getId())) {
-            return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
-        }
-
-        moduloBanco.setTitulo(requestDto.titulo());
-        moduloBanco.setOrdem(requestDto.ordem());
-
-        moduloRepository.save(moduloBanco);
-
-        return ResponseEntity.ok(moduloBanco);
     }
 
     @DeleteMapping("/modulos/{id}")
     @Operation(summary = "Deletar módulo", description = "Apenas o professor dono do curso pode deletar o módulo")
-    public ResponseEntity<?> deletar(@PathVariable Long id,@RequestAttribute("usuario") Professor usuario){
+    public ResponseEntity<Void> deletar(
+            @PathVariable Long id,
+            Authentication authentication
+    ) {
+        try {
+            moduloService.deletar(id, authentication);
+            return ResponseEntity.ok().build();
 
-        Modulo modulo = moduloRepository.findById(id).orElse(null);
+        } catch (Exception e) {
+            if ("MODULO_NAO_ENCONTRADO".equals(e.getMessage())) {
+                return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+            }
 
-        if (modulo == null) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+            if ("CURSO_NAO_ENCONTRADO".equals(e.getMessage())) {
+                return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+            }
+
+            if ("SEM_PERMISSAO".equals(e.getMessage())) {
+                return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+            }
+
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
         }
-
-        Curso curso = modulo.getCurso();
-
-        if (!curso.getProfessor().getId().equals(usuario.getId())) {
-            return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
-        }
-
-        moduloRepository.delete(modulo);
-
-        return ResponseEntity.ok().build();
     }
 }

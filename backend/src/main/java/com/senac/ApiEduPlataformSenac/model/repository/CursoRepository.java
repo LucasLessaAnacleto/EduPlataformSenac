@@ -8,5 +8,8 @@ import java.util.List;
 
 @Repository
 public interface CursoRepository extends JpaRepository<Curso, Long> {
+
     List<Curso> findAllByProfessorId(Long professorId);
+
+    boolean existsByIdAndProfessorId(Long id, Long professorId);
 }

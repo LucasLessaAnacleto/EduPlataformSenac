@@ -1,14 +1,15 @@
 package com.senac.ApiEduPlataformSenac.controllers;
 
+import com.senac.ApiEduPlataformSenac.model.dto.ProfessorRequest;
 import com.senac.ApiEduPlataformSenac.model.dto.ProfessorResponse;
 import com.senac.ApiEduPlataformSenac.model.entities.Professor;
 import com.senac.ApiEduPlataformSenac.model.repository.ProfessorRepository;
+import com.senac.ApiEduPlataformSenac.services.ProfessorService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -21,81 +22,30 @@ public class ProfessorController {
     @Autowired
     private ProfessorRepository professorRepository;
 
+    @Autowired
+    private ProfessorService professorService;
+
     @GetMapping
     @Operation(summary = "Listar todos", description = "Listar todos os professores!")
-    public ResponseEntity<?> listarTodos(){
+    public ResponseEntity<List<ProfessorResponse>> listarTodos() {
+        return ResponseEntity.ok(professorService.listarTodos());
+    }
 
-        List<ProfessorResponse> professores = professorRepository.findAll().stream().map(professor -> new ProfessorResponse(
-                professor.getId(),
-                professor.getUsuario().getNome(),
-                professor.getCpf(),
-                professor.getBiografia()
-        )).toList();
-
-        return ResponseEntity.ok(professores);
+    @GetMapping("/professorlogado")
+    @Operation(summary = "Consulta professor logado", description = "Busca professor vinculado ao usuário autenticado")
+    public ResponseEntity<ProfessorResponse> buscarProfessorLogado(Authentication authentication) {
+        return ResponseEntity.ok(professorService.buscarProfessorLogado(authentication));
     }
 
     @GetMapping("/{id}")
     @Operation(summary = "Consulta de professor por ID", description = "Consultar um professor por ID")
-    public ResponseEntity<?> buscarPorId(@PathVariable Long id){
-
-        Professor professor = professorRepository.findById(id).orElse(null);
-
-        if(professor == null){
-            return ResponseEntity.ok(null);
-        }
-
-        ProfessorResponse response = new ProfessorResponse(
-                professor.getId(),
-                professor.getUsuario().getNome(),
-                professor.getCpf(),
-                professor.getBiografia()
-        );
-
-        return ResponseEntity.ok(response);
+    public ResponseEntity<?> buscarPorId(@PathVariable Long id) {
+        return ResponseEntity.ok(professorService.buscarPorId(id));
     }
 
-    @PostMapping
-    @Operation(summary = "Criar professor", description = "Responsável por criar professor")
-    public ResponseEntity<?> salvar(@RequestBody Professor professor){
-
-        Professor novoProfessor = new Professor();
-//        novoProfessor.setUsuario(professor.getNome());
-        novoProfessor.setCpf(professor.getCpf());
-        novoProfessor.setBiografia(professor.getBiografia());
-
-        return ResponseEntity.ok(professorRepository.save(novoProfessor).getId());
-    }
-
-    @PutMapping("/{id}")
-    @Operation(summary = "Atualizar professor", description = "Responsável por atualizar professor")
-    public ResponseEntity<?> atualizar(@PathVariable Long id,
-                                       @RequestBody Professor professor,
-                                       @RequestAttribute("usuario") Professor usuario){
-
-        if (!usuario.getId().equals(id)) {
-            return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
-        }
-
-        Professor professorBanco = professorRepository.findById(id).orElse(null);
-
-        if (professorBanco == null){
-            return ResponseEntity.notFound().build();
-        }
-
-//        professorBanco.setNome(professor.getNome());
-        professorBanco.setBiografia(professor.getBiografia());
-        // professorBanco.setCpf(professor.getCpf());
-
-        professorRepository.save(professorBanco);
-
-        ProfessorResponse response = new ProfessorResponse(
-                professorBanco.getId(),
-                professorBanco.getUsuario().getNome(),
-                professorBanco.getCpf(),
-                professorBanco.getBiografia()
-        );
-
-        return ResponseEntity.ok(response);
+    @PutMapping("/professorlogado")
+    @Operation(summary = "Atualizar professor logado", description = "Atualiza dados do professor autenticado")
+    public ResponseEntity<?> atualizarProfessorLogado(Authentication authentication, @RequestBody ProfessorRequest professor) {
+        return ResponseEntity.ok(professorService.atualizarProfessorLogado(authentication, professor));
     }
 }

@@ -18,12 +18,11 @@ import java.util.List;
 @AllArgsConstructor
 @NoArgsConstructor
 @Entity
-public class Usuario implements UserDetails{
+public class Usuario implements UserDetails {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-
-    private String nome;
 
     @Column(unique = true)
     private String email;
@@ -35,15 +34,13 @@ public class Usuario implements UserDetails{
     private EnumStatusUsuario status = EnumStatusUsuario.ATIVO;
 
     public Usuario(UsuarioRequest usuario) {
-        this.email =usuario.email();
-        this.nome = usuario.nome();
+        this.email = usuario.email();
         this.senha = usuario.senha();
         this.role = "ROLE_PROFESSOR";
     }
 
     public Usuario(UsuarioAdmRequest usuario) {
-        this.email =usuario.email();
-        this.nome = usuario.nome();
+        this.email = usuario.email();
         this.senha = usuario.senha();
         this.role = "ROLE_ADMIN";
     }
@@ -62,5 +59,4 @@ public class Usuario implements UserDetails{
     public String getUsername() {
         return this.email;
     }
-
 }
