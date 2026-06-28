@@ -23,6 +23,14 @@ services:
       - SPRING_SECRETKEY=awjidauwdaaid87231dcahbsurnasxvcb34d
       - SPRING_EMISSOR=ajdawijd416ll
       - SPRING_TEMPOEXPIRACAO=30
+      - SPRING_MAIL_HOST=sandbox.smtp.mailtrap.io
+      - SPRING_MAIL_PORT=2525
+      - SPRING_MAIL_USERNAME=${MAIL_USERNAME:-fake}
+      - SPRING_MAIL_PASSWORD=${MAIL_PASSWORD:-fake}
+      - SPRING_MAIL_PROPERTIES_MAIL_SMTP_AUTH=true
+      - SPRING_MAIL_PROPERTIES_MAIL_SMTP_STARTTLS_ENABLE=true
+
+      - APP_EMAIL_REMETENTE=${APP_EMAIL_REMETENTE:-no-reply@eduplatform.com}
     depends_on:
       - postgres-db
 
