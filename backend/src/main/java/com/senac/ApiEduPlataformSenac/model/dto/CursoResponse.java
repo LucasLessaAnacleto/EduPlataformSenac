@@ -1,4 +1,0 @@
-package com.senac.ApiEduPlataformSenac.model.dto;
-
-public record CursoResponse(Long id,String titulo,String descricao,Double preco,Long professorId) {
-}
