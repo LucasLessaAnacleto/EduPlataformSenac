@@ -63,7 +63,7 @@ public class JwtFilter extends OncePerRequestFilter {
                 String email = decodedToken.getSubject();
 
                 Usuario usuarioLogado = usuarioRepository
-                        .findByEmail(email)
+                        .findByEmail_email(email)
                         .orElse(null);
 
                 if (usuarioLogado == null) {

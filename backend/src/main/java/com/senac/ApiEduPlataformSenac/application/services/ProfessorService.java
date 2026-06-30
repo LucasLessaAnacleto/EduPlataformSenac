@@ -5,6 +5,7 @@ import com.senac.ApiEduPlataformSenac.application.DTO.ProfessorResponse;
 import com.senac.ApiEduPlataformSenac.domain.entities.Professor;
 import com.senac.ApiEduPlataformSenac.domain.entities.Usuario;
 import com.senac.ApiEduPlataformSenac.domain.repository.ProfessorRepository;
+import com.senac.ApiEduPlataformSenac.domain.valueobjects.CPF;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
@@ -34,7 +35,7 @@ public class ProfessorService {
         return new ProfessorResponse(
                 professor.getId(),
                 professor.getNome(),
-                professor.getCpf(),
+                professor.getCpf().toString(),
                 professor.getBiografia()
         );
     }
@@ -45,7 +46,7 @@ public class ProfessorService {
                 .map(professor -> new ProfessorResponse(
                         professor.getId(),
                         professor.getNome(),
-                        professor.getCpf(),
+                        professor.getCpf().toString(),
                         professor.getBiografia()
                 ))
                 .toList();
@@ -61,7 +62,7 @@ public class ProfessorService {
         return new ProfessorResponse(
                 professor.getId(),
                 professor.getNome(),
-                professor.getCpf(),
+                professor.getCpf().toString(),
                 professor.getBiografia()
         );
     }
@@ -70,7 +71,7 @@ public class ProfessorService {
         Professor professorBanco = buscarProfessorLogadoEntidade(authentication);
 
         professorBanco.setNome(professorRequest.nome());
-        professorBanco.setCpf(professorRequest.cpf());
+        professorBanco.setCpf( new CPF(professorRequest.cpf()) );
         professorBanco.setBiografia(professorRequest.biografia());
 
         professorRepository.save(professorBanco);
@@ -78,16 +79,16 @@ public class ProfessorService {
         return new ProfessorResponse(
                 professorBanco.getId(),
                 professorBanco.getNome(),
-                professorBanco.getCpf(),
+                professorBanco.getCpf().toString(),
                 professorBanco.getBiografia()
         );
     }
 
-    public Professor criarProfessor(Usuario usuario,ProfessorRequest professorRequest) {
+    public Professor criarProfessor(Usuario usuario, ProfessorRequest professorRequest) {
         Professor professor = new Professor();
 
         professor.setNome(professorRequest.nome());
-        professor.setCpf(professorRequest.cpf());
+        professor.setCpf( new CPF(professorRequest.cpf()) );
         professor.setBiografia(professorRequest.biografia());
         professor.setUsuario(usuario);
 

@@ -1,5 +1,6 @@
 package com.senac.ApiEduPlataformSenac.domain.entities;
 
+import com.senac.ApiEduPlataformSenac.domain.valueobjects.CPF;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -19,7 +20,8 @@ public class Professor {
 
     private String nome;
 
-    private String cpf;
+    @Embedded
+    private CPF cpf;
 
     private String biografia;
 

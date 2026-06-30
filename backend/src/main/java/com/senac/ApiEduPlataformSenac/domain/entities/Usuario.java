@@ -1,8 +1,10 @@
 package com.senac.ApiEduPlataformSenac.domain.entities;
 
 import com.senac.ApiEduPlataformSenac.application.DTO.UsuarioAdmRequest;
+import com.senac.ApiEduPlataformSenac.application.DTO.UsuarioProfessorRequest;
 import com.senac.ApiEduPlataformSenac.application.DTO.UsuarioRequest;
 import com.senac.ApiEduPlataformSenac.domain.enuns.EnumStatusUsuario;
+import com.senac.ApiEduPlataformSenac.domain.valueobjects.Email;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -24,8 +26,9 @@ public class Usuario implements UserDetails {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @Embedded
     @Column(unique = true)
-    private String email;
+    private Email email;
 
     private String senha;
 
@@ -33,14 +36,14 @@ public class Usuario implements UserDetails {
 
     private EnumStatusUsuario status = EnumStatusUsuario.ATIVO;
 
-    public Usuario(UsuarioRequest usuario) {
-        this.email = usuario.email();
+    public Usuario(UsuarioProfessorRequest usuario) {
+        this.email = new Email(usuario.email());
         this.senha = usuario.senha();
         this.role = "ROLE_PROFESSOR";
     }
 
     public Usuario(UsuarioAdmRequest usuario) {
-        this.email = usuario.email();
+        this.email = new Email(usuario.email());
         this.senha = usuario.senha();
         this.role = "ROLE_ADMIN";
     }
@@ -57,6 +60,6 @@ public class Usuario implements UserDetails {
 
     @Override
     public String getUsername() {
-        return this.email;
+        return this.email != null ? this.email.toString() : "";
     }
 }

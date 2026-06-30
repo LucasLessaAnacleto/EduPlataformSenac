@@ -10,7 +10,8 @@ public class CPF {
 
     public CPF(String cpf) {
         if (cpf == null || cpf.isBlank()) {
-            throw new IllegalArgumentException("CPF_NAO_INFORMADO");
+            this.cpf = "";
+            return;
         }
 
         String cpfTratado = cpf.replaceAll("[^0-9]", "");

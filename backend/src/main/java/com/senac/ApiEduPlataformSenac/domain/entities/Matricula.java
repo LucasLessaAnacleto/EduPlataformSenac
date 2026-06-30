@@ -1,5 +1,6 @@
 package com.senac.ApiEduPlataformSenac.domain.entities;
 
+import com.senac.ApiEduPlataformSenac.domain.valueobjects.Email;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -20,7 +21,9 @@ public class Matricula {
     private Long id;
 
     private String nomeAluno;
-    private String emailAluno;
+
+    @Embedded
+    private Email emailAluno;
     private LocalDate data;
 
     @ManyToOne

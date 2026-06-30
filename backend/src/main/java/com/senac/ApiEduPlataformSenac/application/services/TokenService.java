@@ -52,7 +52,7 @@ public class TokenService {
 
             var usuario = usuarioRepository.findAll()
                     .stream()
-                    .filter(us -> us.getEmail().equals(email))
+                    .filter(us -> us.getEmail().toString().equals(email.toLowerCase()))
                     .findFirst().orElse(null);
 
             tokenRepository.save(new Token(tokenContent, usuario));

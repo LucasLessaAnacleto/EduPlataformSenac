@@ -32,7 +32,14 @@ public class SecurityConfiguration {
                                 "/v3/api-docs/**"
                         )
                         .permitAll()
+                        .requestMatchers(HttpMethod.GET, "/usuarios/usuariologado").authenticated()
+                        // ADMIN
                         .requestMatchers(HttpMethod.GET, "/usuarios").hasRole("ADMIN")
+                        .requestMatchers(HttpMethod.GET, "/usuarios/{id}").hasRole("ADMIN")
+                        .requestMatchers(HttpMethod.POST, "/usuarios").hasRole("ADMIN")
+                        .requestMatchers(HttpMethod.PUT, "/usuarios/{id}").hasRole("ADMIN")
+                        .requestMatchers(HttpMethod.PUT, "/usuarios/{id}/AlterarStatus").hasRole("ADMIN")
+
                         .anyRequest().authenticated()
                 )
                 .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class)

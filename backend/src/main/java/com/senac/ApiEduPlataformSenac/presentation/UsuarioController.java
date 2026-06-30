@@ -74,7 +74,10 @@ public class UsuarioController {
             if ("EMAIL_JA_CADASTRADO".equals(e.getMessage())) {
                 return ResponseEntity.badRequest().body("E-mail já cadastrado.");
             }
-
+            if ("SECRET_INVALIDO".equals(e.getMessage())) {
+                return ResponseEntity.status(HttpStatus.FORBIDDEN).body("Sem permissão para acessar esse recurso!");
+            }
+            System.out.println(e);
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
         }
     }

@@ -2,9 +2,10 @@ package com.senac.ApiEduPlataformSenac.application.services;
 
 import com.senac.ApiEduPlataformSenac.application.DTO.*;
 import com.senac.ApiEduPlataformSenac.domain.entities.Usuario;
-import com.senac.ApiEduPlataformSenac.domain.enuns.EnumStatusUsuario;
 import com.senac.ApiEduPlataformSenac.domain.repository.UsuarioRepository;
+import com.senac.ApiEduPlataformSenac.domain.valueobjects.Email;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.security.core.Authentication;
 
@@ -17,6 +18,9 @@ public class UsuarioService {
 
     @Autowired
     public ProfessorService professorService;
+
+    @Value("${spring.secretKey}")
+    private String secret;
 
     public List<UsuarioResponse> listarTodos() {
         return usuarioRepository.findAll()
@@ -37,7 +41,7 @@ public class UsuarioService {
 
     public boolean validaUsuarioSenha(LoginRequest loginRequest) {
         try{
-            return usuarioRepository.existsByEmailAndSenha(loginRequest.email(), loginRequest.senha());
+            return usuarioRepository.existsByEmail_emailAndSenha(loginRequest.email().toLowerCase(), loginRequest.senha());
         } catch (Exception e) {
             System.out.println(e.toString());
             return false;
@@ -51,12 +55,12 @@ public class UsuarioService {
             throw new Exception("USUARIO_NAO_ENCONTRADO");
         }
 
-        if (usuarioRequest.email() != null && !usuarioRequest.email().equals(usuarioBanco.getEmail())) {
-            if (usuarioRepository.findByEmail(usuarioRequest.email()).isPresent()) {
+        if (usuarioRequest.email() != null && !usuarioRequest.email().equals(usuarioBanco.getEmail().toString())) {
+            if (usuarioRepository.findByEmail_email(usuarioRequest.email()).isPresent()) {
                 throw new Exception("EMAIL_JA_CADASTRADO");
             }
 
-            usuarioBanco.setEmail(usuarioRequest.email());
+            usuarioBanco.setEmail( new Email(usuarioRequest.email()) );
         }
 
         if (usuarioRequest.senha() != null && !usuarioRequest.senha().isBlank()) {
@@ -82,17 +86,11 @@ public class UsuarioService {
     }
 
     public UsuarioResponse criarUsuarioProfessor(UsuarioProfessorRequest usuarioRequest) throws Exception {
-        if (usuarioRepository.findByEmail(usuarioRequest.email()).isPresent()) {
+        if (usuarioRepository.findByEmail_email(usuarioRequest.email()).isPresent()) {
             throw new Exception("EMAIL_JA_CADASTRADO");
         }
 
-        Usuario usuario = new Usuario();
-        usuario.setEmail(usuarioRequest.email());
-        usuario.setSenha(usuarioRequest.senha());
-        usuario.setRole("PROFESSOR");
-        usuario.setStatus(EnumStatusUsuario.ATIVO);
-
-        Usuario usuarioSalvo = usuarioRepository.save(usuario);
+        Usuario usuarioSalvo = usuarioRepository.save(new Usuario(usuarioRequest));
 
         ProfessorRequest professorRequest = new ProfessorRequest(
                 usuarioRequest.nome(),
@@ -104,31 +102,29 @@ public class UsuarioService {
 
         return new UsuarioResponse(
                 usuarioSalvo.getId(),
-                usuarioSalvo.getEmail(),
+                usuarioSalvo.getEmail().toString(),
                 usuarioSalvo.getStatus(),
                 usuarioSalvo.getRole()
         );
     }
 
     public UsuarioResponse criarUsuarioAdm(UsuarioAdmRequest usuarioRequest) throws Exception {
-        if (usuarioRepository.findByEmail(usuarioRequest.email()).isPresent()) {
-            throw new Exception("EMAIL_JA_CADASTRADO");
+        if(usuarioRequest.secretKey() != null && usuarioRequest.secretKey().equals( secret )) {
+            if (usuarioRepository.findByEmail_email(usuarioRequest.email()).isPresent()) {
+                throw new Exception("EMAIL_JA_CADASTRADO");
+            }
+
+            Usuario usuarioSalvo = usuarioRepository.save( new Usuario(usuarioRequest) );
+
+            return new UsuarioResponse(
+                    usuarioSalvo.getId(),
+                    usuarioSalvo.getEmail().toString(),
+                    usuarioSalvo.getStatus(),
+                    usuarioSalvo.getRole()
+            );
+        }else {
+            throw new Exception("SECRET_INVALIDO");
         }
-
-        Usuario usuario = new Usuario();
-        usuario.setEmail(usuarioRequest.email());
-        usuario.setSenha(usuarioRequest.senha());
-        usuario.setRole("ADMIN");
-        usuario.setStatus(EnumStatusUsuario.ATIVO);
-
-        Usuario usuarioSalvo = usuarioRepository.save(usuario);
-
-        return new UsuarioResponse(
-                usuarioSalvo.getId(),
-                usuarioSalvo.getEmail(),
-                usuarioSalvo.getStatus(),
-                usuarioSalvo.getRole()
-        );
     }
 
     public UsuarioResponse buscarUsuarioLogado(Authentication authentication) {
@@ -138,7 +134,7 @@ public class UsuarioService {
             return usuarioRepository.findById(usuario.getId())
                     .map(usuarioBanco -> new UsuarioResponse(
                             usuarioBanco.getId(),
-                            usuarioBanco.getEmail(),
+                            usuarioBanco.getEmail().toString(),
                             usuarioBanco.getStatus(),
                             usuarioBanco.getRole()
                     ))
@@ -152,7 +148,7 @@ public class UsuarioService {
     private UsuarioResponse converterParaResponse(Usuario usuario) {
         return new UsuarioResponse(
                 usuario.getId(),
-                usuario.getEmail(),
+                usuario.getEmail().toString(),
                 usuario.getStatus(),
                 usuario.getRole()
         );

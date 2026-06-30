@@ -1,5 +1,6 @@
 package com.senac.ApiEduPlataformSenac.application.services;
 
+import com.senac.ApiEduPlataformSenac.domain.valueobjects.Email;
 import com.senac.ApiEduPlataformSenac.infra.external.EnvioDeEmail;
 import com.senac.ApiEduPlataformSenac.application.DTO.MatriculaRequest;
 import com.senac.ApiEduPlataformSenac.application.DTO.MatriculaResponse;
@@ -43,14 +44,14 @@ public class MatriculaService {
 
         Matricula matricula = new Matricula();
         matricula.setNomeAluno(request.nomeAluno());
-        matricula.setEmailAluno(request.emailAluno());
+        matricula.setEmailAluno( new Email(request.emailAluno()) );
         matricula.setData(LocalDate.now());
         matricula.setCurso(curso);
 
         Matricula matriculaSalva = matriculaRepository.save(matricula);
 
         envioDeEmail.enviarBoasVindas(
-                matriculaSalva.getEmailAluno(),
+                matriculaSalva.getEmailAluno().toString(),
                 matriculaSalva.getNomeAluno(),
                 curso.getTitulo()
         );
@@ -68,7 +69,7 @@ public class MatriculaService {
         cursoService.buscarCursoDoProfessor(matriculaBanco.getCurso().getId(), authentication);
 
         matriculaBanco.setNomeAluno(request.nomeAluno());
-        matriculaBanco.setEmailAluno(request.emailAluno());
+        matriculaBanco.setEmailAluno( new Email(request.emailAluno()) );
 
         matriculaRepository.save(matriculaBanco);
 
@@ -95,7 +96,7 @@ public class MatriculaService {
         return new MatriculaResponse(
                 matricula.getId(),
                 matricula.getNomeAluno(),
-                matricula.getEmailAluno(),
+                matricula.getEmailAluno().toString(),
                 matricula.getData(),
                 matricula.getCurso().getId()
         );

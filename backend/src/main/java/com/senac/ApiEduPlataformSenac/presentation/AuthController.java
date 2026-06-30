@@ -32,7 +32,7 @@ public class AuthController {
 
         if(usuarioService.validaUsuarioSenha(loginRequest)){
 
-            String token = tokenService.gerarToken(loginRequest.email());
+            String token = tokenService.gerarToken(loginRequest.email().toLowerCase());
 
             return ResponseEntity.ok(new LoginResponse(token));
         }
