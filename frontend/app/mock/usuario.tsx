@@ -1,5 +1,5 @@
 // arquivo: /app/mock/usuario.ts
-import { Usuario } from "@/app/context/AuthContext";
+import { Usuario } from "@/app/_context/AuthContext";
 
 export class UsuarioMock {
 

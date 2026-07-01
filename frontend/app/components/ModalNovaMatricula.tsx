@@ -1,7 +1,7 @@
 'use client'
 
-import { api } from "../utils/api"
-import { Matricula } from "../types"
+import { Matricula } from "../types/matriculas"
+import { salvarMatricula } from "../services/matriculaService"
 
 type Props = {
     open: boolean
@@ -28,27 +28,29 @@ export default function ModalNovaMatricula({
             return
         }
 
-        const response = await api.post<number>("/matriculas", {
-            nomeAluno,
-            emailAluno,
-            cursoId
-        })
+        try {
+            const matriculaId = await salvarMatricula({
+                nomeAluno,
+                emailAluno,
+                cursoId
+            })
 
-        if (response.status !== 200) {
+            alert("Matrícula criada com sucesso!")
+
+            onCreate({
+                id: Number(matriculaId),
+                nomeAluno,
+                emailAluno,
+                data: new Date().toISOString(),
+                cursoId
+            })
+
+            onClose()
+
+        } catch (error) {
+            console.error(error)
             alert("Erro ao criar matrícula!")
-            return
         }
-
-        alert("Matrícula criada com sucesso!")
-
-        onCreate({
-            id: Number(response.data),
-            nomeAluno,
-            emailAluno,
-            data: new Date().toISOString()
-        })
-
-        onClose()
     }
 
     return (
@@ -56,7 +58,6 @@ export default function ModalNovaMatricula({
 
             <div className="w-full max-w-md bg-zinc-900 border border-zinc-800 rounded-xl shadow-2xl p-6">
 
-                {/* Header */}
                 <div className="flex items-center justify-between mb-6">
                     <h2 className="text-lg font-semibold text-zinc-100">
                         Nova matrícula
@@ -70,7 +71,6 @@ export default function ModalNovaMatricula({
                     </button>
                 </div>
 
-                {/* Form */}
                 <form className="space-y-5" action={handleNovaMatricula}>
 
                     <div className="flex flex-col gap-2">

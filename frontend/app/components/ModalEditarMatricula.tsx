@@ -1,13 +1,13 @@
 'use client'
 
-import { api } from "../utils/api"
-import { Matricula } from "../types"
+import { Matricula } from "../types/matriculas"
+import { atualizarMatricula } from "../services/matriculaService"
 
 type Props = {
     open: number | null
     onClose: () => void
     matricula: Matricula
-    onUpdate: (id: Number, matricula: Matricula) => void
+    onUpdate: (id: number, matricula: Matricula) => void
 }
 
 export default function ModalEditarMatricula({
@@ -17,7 +17,7 @@ export default function ModalEditarMatricula({
     onUpdate
 }: Props) {
 
-    if (!open || !matricula) return null
+    if (!open || !matricula || !matricula.id) return null
 
     async function handleUpdate(formData: FormData) {
         const nomeAluno = formData.get("nomeAluno")?.toString()
@@ -28,25 +28,26 @@ export default function ModalEditarMatricula({
             return
         }
 
-        const response = await api.put(`/matriculas/${matricula.id}`, {
-            nomeAluno,
-            emailAluno
-        })
+        try {
+            const matriculaAtualizada = await atualizarMatricula(Number(matricula.id), {
+                nomeAluno,
+                emailAluno,
+                cursoId: matricula.cursoId
+            })
 
-        if (response.status !== 200) {
+            alert("Matrícula atualizada!")
+
+            onUpdate(Number(matricula.id), {
+                ...matriculaAtualizada,
+                cursoId: matricula.cursoId
+            })
+
+            onClose()
+
+        } catch (error) {
+            console.error(error)
             alert("Erro ao atualizar matrícula!")
-            return
         }
-
-        alert("Matrícula atualizada!")
-
-        onUpdate(matricula.id,{
-            ...matricula,
-            nomeAluno,
-            emailAluno
-        })
-
-        onClose()
     }
 
     return (
@@ -54,7 +55,6 @@ export default function ModalEditarMatricula({
 
             <div className="w-full max-w-md bg-zinc-900 border border-zinc-800 rounded-xl shadow-2xl p-6">
 
-                {/* Header */}
                 <div className="flex items-center justify-between mb-6">
                     <h2 className="text-lg font-semibold text-zinc-100">
                         Editar matrícula

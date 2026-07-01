@@ -1,47 +1,48 @@
-import { useRouter } from "next/navigation";
-import { api } from "../utils/api";
-import { Modulo } from "../types";
+import { Modulo } from "../types/modulos"
+import { salvarModulo } from "../services/moduloService"
 
 type Props = {
     open: boolean
-    onClose: () => void,
-    cursoId: number,
+    onClose: () => void
+    cursoId: number
     onCreate: (modulo: Modulo) => void
 }
 
 export default function ModalNovoModulo({ open, onClose, cursoId, onCreate }: Props) {
-    if (!open) return null;
+    if (!open) return null
 
-    const router = useRouter();
+    async function handleNovoModulo(formData: FormData) {
+        const titulo = formData.get("titulo")?.toString()
+        const ordem = Number(formData.get("ordem")?.toString() || 0)
 
-    async function handleNovoCurso(formData: FormData) {
-        const titulo = formData.get("titulo")?.toString();
-        const ordem = Number(formData.get("ordem")?.toString() || 0);
-
-        if(!titulo || !ordem) {
+        if (!titulo || !ordem) {
             alert("Preencha todos os campos!")
             return
         }
 
-        const response = await api.post<Number>("/modulos", {
-            titulo,
-            ordem,
-            cursoId
-        });
+        try {
+            const moduloId = await salvarModulo({
+                titulo,
+                ordem,
+                cursoId
+            })
 
-        if(response.status !== 200) {
-            alert("Erro ao criar modulo!")
-            return
+            alert("Módulo criado com sucesso!")
+
+            onCreate({
+                id: Number(moduloId),
+                titulo,
+                ordem,
+                cursoId
+            })
+
+            onClose()
+
+        } catch (error) {
+            console.error(error)
+            alert("Erro ao criar módulo!")
         }
-        alert("Modulo criado com sucesso!");
-        onCreate({
-            id: Number(response.data),
-            titulo,
-            ordem
-        })
-        onClose()
     }
-
 
     return (
         <div className="
@@ -61,7 +62,6 @@ export default function ModalNovoModulo({ open, onClose, cursoId, onCreate }: Pr
                 p-6
             ">
 
-                {/* Header */}
                 <div className="flex items-center justify-between mb-6">
 
                     <h2 className="text-lg font-semibold text-zinc-100">
@@ -81,11 +81,8 @@ export default function ModalNovoModulo({ open, onClose, cursoId, onCreate }: Pr
 
                 </div>
 
+                <form className="space-y-5" action={handleNovoModulo}>
 
-                {/* Form */}
-                <form className="space-y-5" action={handleNovoCurso}>
-
-                    {/* Título */}
                     <div className="flex flex-col gap-2">
 
                         <label className="text-sm text-zinc-400">
@@ -112,8 +109,6 @@ export default function ModalNovoModulo({ open, onClose, cursoId, onCreate }: Pr
 
                     </div>
 
-
-                    {/* Ordem */}
                     <div className="flex flex-col gap-2">
 
                         <label className="text-sm text-zinc-400">
@@ -144,8 +139,6 @@ export default function ModalNovoModulo({ open, onClose, cursoId, onCreate }: Pr
 
                     </div>
 
-
-                    {/* Botões */}
                     <div className="flex justify-end gap-3 pt-4">
 
                         <button

@@ -2,7 +2,7 @@
 import { createContext, ReactNode, useContext, useEffect, useState } from "react";
 import Cookies from "js-cookie";
 import { useRouter } from "next/navigation";
-import { AuthContextType, Usuario } from "../types/usuario";
+import { AuthContextType, Usuario } from "../types/usuarios";
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 

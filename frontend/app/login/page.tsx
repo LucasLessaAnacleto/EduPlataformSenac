@@ -3,19 +3,20 @@
 import { useRouter } from "next/navigation"
 import Link from "next/link"
 import Logo from "../components/Logo"
-import { useAuth } from "../context/AuthContext"
-import { api } from "../utils/api"
 import Button from "../components/Button"
-import { LoginResponse } from "../types/Auth"
-import { Usuario } from "../types/usuario"
+import { loginService } from "../services/authService"
+import { buscarUsuarioLogado } from "../services/usuarioService"
+import { LoginResponse } from "../types/auth"
+import { Usuario, UsuarioResponse } from "../types/usuarios"
+import { useDispatch } from "react-redux"
+import { AppDispatch } from "../redux/store"
+import { setToken, setUsuario } from "../redux/slices/authSlice"
 
 export default function LoginPage() {
-
-    const { login } = useAuth()
     const router = useRouter()
+    const dispatch = useDispatch<AppDispatch>()
 
     async function handleLogin(formData: FormData) {
-
         const email = formData.get("email")?.toString()
         const senha = formData.get("senha")?.toString()
 
@@ -25,26 +26,22 @@ export default function LoginPage() {
         }
 
         try {
+            const loginResult = await loginService({ email, senha })
 
-            const response = await api.post<LoginResponse>(
-                "/auth/login",
-                { email, senha }
-            )
-
-            if (response.status !== 200) {
+            if (!loginResult.token) {
                 alert("Usuário ou senha inválido!")
                 return
             }
 
-            const data = response.data
+            const token = loginResult.token
 
-            const usuario = new Usuario(
-                data.usuario.id,
-                data.usuario.nome,
-                data.usuario.email,
-            )
+            dispatch(setToken({ token }))
 
-            login(usuario, data.token)
+            const usuario = await buscarUsuarioLogado()
+
+            dispatch(setUsuario({
+                usuario: { ...usuario }
+            }))
 
             router.push("/home")
 
@@ -68,14 +65,12 @@ export default function LoginPage() {
                     </h1>
 
                     <p className="text-sm text-zinc-400">
-                        Entre com sua conta de professor
+                        Entre com sua conta
                     </p>
-
                 </div>
 
                 <form className="space-y-5" action={handleLogin}>
                     <div className="flex flex-col gap-2">
-
                         <label className="text-sm text-zinc-400">
                             E-mail
                         </label>
@@ -83,15 +78,13 @@ export default function LoginPage() {
                         <input
                             type="email"
                             name="email"
-                            placeholder="professor@email.com"
+                            placeholder="usuario@email.com"
                             className="bg-zinc-950 border border-zinc-800 rounded-lg px-4 py-2.5 text-sm text-zinc-200 outline-none 
                                 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/30 transition"
                         />
-
                     </div>
 
                     <div className="flex flex-col gap-2">
-
                         <label className="text-sm text-zinc-400">
                             Senha
                         </label>
@@ -101,7 +94,7 @@ export default function LoginPage() {
                             name="senha"
                             placeholder="••••••••"
                             className="bg-zinc-950 border border-zinc-800 rounded-lg px-4 py-2.5 text-sm text-zinc-200 outline-none 
-                                focus:border-blue-500focus:ring-2 focus:ring-blue-500/30 transition"
+                                focus:border-blue-500 focus:ring-2 focus:ring-blue-500/30 transition"
                         />
                     </div>
 

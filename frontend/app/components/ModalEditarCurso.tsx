@@ -1,8 +1,7 @@
 'use client'
 
-import { api } from "../utils/api"
-import { Curso } from "../types"
-import { useState } from "react"
+import { Curso } from "../types/cursos"
+import { atualizarCurso } from "../services/cursoService"
 
 type Props = {
     open: boolean
@@ -30,21 +29,14 @@ export default function ModalEditarCurso({
             return
         }
 
-        const response = await api.put<Curso>(`/cursos/${curso.id}`, {
+        const cursoAtualizado = await atualizarCurso(Number(curso.id), {
             titulo,
             descricao,
             preco
         })
 
-        if (response.status !== 200) {
-            alert("Erro ao atualizar curso!")
-            return
-        }
-
         alert("Curso atualizado com sucesso!")
-
-        onUpdate(response.data)
-
+        onUpdate(cursoAtualizado)
         onClose()
     }
 

@@ -5,9 +5,10 @@ import Button from "@/app/components/Button"
 import ModalNovoCurso from "@/app/components/ModalNovoCurso"
 import CursoCard from "@/app/components/CursoCard"
 import Loading from "@/app/components/Loading"
-import { api } from "@/app/utils/api"
-import { Curso } from "@/app/types/curso"
-import { usePesquisa } from "@/app/context/PesquisaContext"
+import { Curso } from "@/app/types/cursos"
+import { useDispatch, useSelector } from "react-redux"
+import { AppDispatch, RootState } from "@/app/redux/store"
+import { adicionarPesquisa, limparPesquisas } from "@/app/redux/slices/pesquisaSlice"
 import { buscaCursos } from "@/app/services/cursoService"
 
 export default function CursosPage() {
@@ -16,7 +17,8 @@ export default function CursosPage() {
     const [cursos, setCursos] = useState<Curso[]>([])
     const [loading, setLoading] = useState(true);
     const [pesquisa, setPesquisa] = useState("");
-    const { pesquisas, adicionarPesquisa, limparPesquisas } = usePesquisa();
+    const dispatch = useDispatch<AppDispatch>()
+    const pesquisas = useSelector((state: RootState) => state.pesquisa.pesquisas)
     const [isFocused, setIsFocused] = useState(false)
 
     useEffect(() => {
@@ -92,7 +94,7 @@ export default function CursosPage() {
                     onChange={(e) => setPesquisa(e.target.value)}
                     onKeyDown={(e) => {
                         if (e.key === "Enter" && pesquisa.trim()) {
-                            adicionarPesquisa(pesquisa)
+                            dispatch(adicionarPesquisa({ termo: pesquisa }))
                         }
                     }}
                     onFocus={() => setIsFocused(true)}
@@ -120,7 +122,7 @@ export default function CursosPage() {
                         ))}
 
                         <button
-                            onClick={limparPesquisas}
+                            onClick={() => dispatch(limparPesquisas())}
                             className="
                                 text-xs
                                 text-red-400

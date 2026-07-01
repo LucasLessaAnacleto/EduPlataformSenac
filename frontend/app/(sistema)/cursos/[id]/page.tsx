@@ -1,17 +1,22 @@
 'use client'
 
-import Loading from "@/app/components/Loading";
-import ModalEditarMatricula from "@/app/components/ModalEditarMatricula";
-import ModalEditarModulo from "@/app/components/ModalEditarModulo";
-import ModalNovaMatricula from "@/app/components/ModalNovaMatricula";
-import ModalNovoModulo from "@/app/components/ModalNovoModulo";
-import { Curso, Matricula, Modulo } from "@/app/types";
-import { api } from "@/app/utils/api";
-import Link from "next/link";
-import { useParams } from "next/navigation";
-import { useEffect, useState } from "react";
-import { Pencil } from "lucide-react"
-import ModalEditarCurso from "@/app/components/ModalEditarCurso";
+'use client'
+
+import Loading from "@/app/components/Loading"
+import ModalEditarMatricula from "@/app/components/ModalEditarMatricula"
+import ModalEditarModulo from "@/app/components/ModalEditarModulo"
+import ModalNovaMatricula from "@/app/components/ModalNovaMatricula"
+import ModalNovoModulo from "@/app/components/ModalNovoModulo"
+import ModalEditarCurso from "@/app/components/ModalEditarCurso"
+import { Curso } from "@/app/types/cursos"
+import { Modulo } from "@/app/types/modulos"
+import { Matricula } from "@/app/types/matriculas"
+import { buscarCursoPorId } from "@/app/services/cursoService"
+import { buscarModulosPorCurso, deletarModulo } from "@/app/services/moduloService"
+import { buscarMatriculasPorCurso, deletarMatricula } from "@/app/services/matriculaService"
+import Link from "next/link"
+import { useParams } from "next/navigation"
+import { useEffect, useState } from "react"
 
 export default function CursoDetalhe() {
 
@@ -37,16 +42,15 @@ export default function CursoDetalhe() {
 
     const fetchData = async () => {
         try {
-
-            const [cursoRes, modulosRes, matriculasRes] = await Promise.all([
-                api.get<Curso>(`/cursos/${cursoId}`),
-                api.get<Modulo[]>(`/cursos/${cursoId}/modulos`),
-                api.get<Matricula[]>(`/cursos/${cursoId}/matriculas`)
+            const [cursoDados, modulosDados, matriculasDados] = await Promise.all([
+                buscarCursoPorId(cursoId),
+                buscarModulosPorCurso(cursoId),
+                buscarMatriculasPorCurso(cursoId)
             ])
 
-            setCurso(cursoRes.data)
-            setModulos(modulosRes.data)
-            setMatriculas(matriculasRes.data)
+            setCurso(cursoDados)
+            setModulos(modulosDados)
+            setMatriculas(matriculasDados)
 
         } catch (error) {
             console.error(error)
@@ -56,11 +60,11 @@ export default function CursoDetalhe() {
         }
     }
 
-    const handleDeleteModulo = async (id: number) => {
-        if (!confirm("Deseja realmente excluir este módulo?")) return;
+    const handleDeleteModulo = async (id: number | null) => {
+        if (!confirm("Deseja realmente excluir este módulo?")) return
 
         try {
-            await api.delete(`/modulos/${id}`)
+            await deletarModulo(id)
             setModulos(prev => prev.filter(m => m.id !== id))
         } catch (error) {
             console.error(error)
@@ -69,10 +73,10 @@ export default function CursoDetalhe() {
     }
 
     const handleDeleteMatricula = async (id: number) => {
-        if (!confirm("Remover matrícula?")) return;
+        if (!confirm("Remover matrícula?")) return
 
         try {
-            await api.delete(`/matriculas/${id}`)
+            await deletarMatricula(id)
             setMatriculas(prev => prev.filter(m => m.id !== id))
         } catch (error) {
             console.error(error)

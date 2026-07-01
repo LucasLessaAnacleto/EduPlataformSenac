@@ -1,6 +1,6 @@
 'use client'
 
-import { useAuth } from "@/app/context/AuthContext"
+import { useAuth } from "@/app/_context/AuthContext"
 import { Professor } from "@/app/types"
 import { api } from "@/app/utils/api"
 import Link from "next/link"

@@ -1,6 +1,6 @@
 import { useRouter } from "next/navigation";
-import { api } from "../utils/api";
-import { Curso } from "../types";
+import { Curso } from "../types/cursos"
+import { salvarCurso } from "../services/cursoService"
 
 type Props = {
     open: boolean
@@ -22,24 +22,15 @@ export default function ModalNovoCurso({ open, onClose, onCreate }: Props) {
             return
         }
 
-        const response = await api.post<Number>("/cursos", {
+        const cursoSalvo = await salvarCurso({
             titulo,
             descricao,
             preco: parseFloat(preco)
         });
 
-        if(response.status !== 200) {
-            alert("Erro ao criar curso!")
-            return
-        }
-        alert("Curso criado com sucesso!");
-        onCreate({
-            id: Number(response.data),
-            titulo,
-            descricao,
-            preco: parseFloat(preco)
-        });
-        onClose();
+        alert("Curso criado com sucesso!")
+        onCreate(cursoSalvo)
+        onClose()
     }
 
     return (

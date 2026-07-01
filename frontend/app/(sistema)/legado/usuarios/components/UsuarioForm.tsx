@@ -1,6 +1,6 @@
 'use client'
 
-import { Usuario } from "@/app/context/legado/AuthContext"
+import { Usuario } from "@/app/_context/legado/AuthContext"
 import { UsuarioMock } from "@/app/mock/usuario";
 import { api } from "@/app/utils/api";
 import Link from "next/link";

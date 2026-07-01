@@ -1,12 +1,13 @@
 'use client'
-import { Modulo } from "../types"
-import { api } from "../utils/api"
+
+import { Modulo } from "../types/modulos"
+import { atualizarModulo } from "../services/moduloService"
 
 type Props = {
-    open: null|number
+    open: null | number
     onClose: () => void
-    modulo: Modulo,
-    onUpdate: (id: Number, modulo: Modulo) => void
+    modulo: Modulo
+    onUpdate: (id: number, modulo: Modulo) => void
 }
 
 export default function ModalEditarModulo({
@@ -16,7 +17,7 @@ export default function ModalEditarModulo({
     onUpdate
 }: Props) {
 
-    if (!open || !modulo) return null
+    if (!open || !modulo || !modulo.id) return null
 
     async function handleUpdate(formData: FormData) {
         const titulo = formData.get("titulo")?.toString()
@@ -27,25 +28,26 @@ export default function ModalEditarModulo({
             return
         }
 
-        const response = await api.put(`/modulos/${modulo.id}`, {
-            titulo,
-            ordem
-        })
+        try {
+            const moduloAtualizado = await atualizarModulo(Number(modulo.id), {
+                titulo,
+                ordem,
+                cursoId: modulo.cursoId
+            })
 
-        if (response.status !== 200) {
+            alert("Módulo atualizado!")
+
+            onUpdate(Number(modulo.id), {
+                ...moduloAtualizado,
+                cursoId: modulo.cursoId
+            })
+
+            onClose()
+
+        } catch (error) {
+            console.error(error)
             alert("Erro ao atualizar módulo!")
-            return
         }
-
-        alert("Módulo atualizado!")
-
-        onUpdate(modulo.id, {
-            ...modulo,
-            titulo,
-            ordem
-        })
-
-        onClose()
     }
 
     return (
@@ -113,7 +115,6 @@ export default function ModalEditarModulo({
 
                     </div>
 
-                    {/* Ordem */}
                     <div className="flex flex-col gap-2">
 
                         <label className="text-sm text-zinc-400">
@@ -144,7 +145,6 @@ export default function ModalEditarModulo({
 
                     </div>
 
-                    {/* Botões */}
                     <div className="flex justify-end gap-3 pt-4">
 
                         <button
