@@ -50,10 +50,9 @@ public class TokenService {
                     .withExpiresAt(gerarDataExpiracao())
                     .sign(algorithm);
 
-            var usuario = usuarioRepository.findAll()
-                    .stream()
-                    .filter(us -> us.getEmail().toString().equals(email.toLowerCase()))
-                    .findFirst().orElse(null);
+            var usuario = usuarioRepository
+                    .findByEmail_email(email.toLowerCase())
+                    .orElse(null);
 
             tokenRepository.save(new Token(tokenContent, usuario));
 

@@ -58,6 +58,10 @@ public class MatriculaController {
                 return ResponseEntity.badRequest().body("Não foi possível enviar o e-mail de boas vindas.");
             }
 
+            if ("EMAIL_INVALIDO".equals(e.getMessage())) {
+                return ResponseEntity.badRequest().body("E-mail informado é inválido.");
+            }
+
             if ("CURSO_NAO_ENCONTRADO".equals(e.getMessage())) {
                 return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
             }
@@ -72,7 +76,7 @@ public class MatriculaController {
 
     @PutMapping("/matriculas/{id}")
     @Operation(summary = "Atualizar matrícula", description = "Atualiza matrícula validando professor dono")
-    public ResponseEntity<MatriculaResponse> atualizar(
+    public ResponseEntity<?> atualizar(
             @PathVariable Long id,
             @RequestBody MatriculaRequest request,
             Authentication authentication
@@ -91,6 +95,10 @@ public class MatriculaController {
 
             if ("SEM_PERMISSAO".equals(e.getMessage())) {
                 return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+            }
+
+            if ("EMAIL_INVALIDO".equals(e.getMessage())) {
+                return ResponseEntity.badRequest().body("E-mail informado é inválido.");
             }
 
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();

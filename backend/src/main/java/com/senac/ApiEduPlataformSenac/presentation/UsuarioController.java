@@ -58,6 +58,9 @@ public class UsuarioController {
             if ("EMAIL_JA_CADASTRADO".equals(e.getMessage())) {
                 return ResponseEntity.badRequest().body("E-mail já cadastrado.");
             }
+            if ("EMAIL_INVALIDO".equals(e.getMessage())) {
+                return ResponseEntity.badRequest().body("E-mail informado é inválido.");
+            }
 
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
         }
@@ -74,6 +77,9 @@ public class UsuarioController {
             if ("EMAIL_JA_CADASTRADO".equals(e.getMessage())) {
                 return ResponseEntity.badRequest().body("E-mail já cadastrado.");
             }
+            if ("EMAIL_INVALIDO".equals(e.getMessage())) {
+                return ResponseEntity.badRequest().body("E-mail informado é inválido.");
+            }
             if ("SECRET_INVALIDO".equals(e.getMessage())) {
                 return ResponseEntity.status(HttpStatus.FORBIDDEN).body("Sem permissão para acessar esse recurso!");
             }
@@ -84,7 +90,7 @@ public class UsuarioController {
 
     @PutMapping("/{id}")
     @Operation(summary = "Atualizar usuario", description = "Responsável por atualizar usuário")
-    public ResponseEntity<UsuarioResponse> atualizar(@PathVariable Long id, @RequestBody UsuarioRequest usuarioRequest) {
+    public ResponseEntity<?> atualizar(@PathVariable Long id, @RequestBody UsuarioRequest usuarioRequest) {
         try {
             return ResponseEntity.ok(usuarioService.alterarUsuario(id, usuarioRequest));
 
@@ -95,6 +101,9 @@ public class UsuarioController {
 
             if ("EMAIL_JA_CADASTRADO".equals(e.getMessage())) {
                 return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
+            }
+            if ("EMAIL_INVALIDO".equals(e.getMessage())) {
+                return ResponseEntity.badRequest().body("E-mail informado é inválido.");
             }
 
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
