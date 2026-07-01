@@ -3,4 +3,4 @@ DROP TABLE matricula;
 DROP TABLE curso;
 DROP TABLE professor;
 DROP TABLE token;
-DROP TABLE usuário;
+DROP TABLE usuario;
