@@ -4,6 +4,7 @@ import com.senac.ApiEduPlataformSenac.application.DTO.CursoRequest;
 import com.senac.ApiEduPlataformSenac.application.DTO.CursoResponse;
 import com.senac.ApiEduPlataformSenac.domain.entities.Curso;
 import com.senac.ApiEduPlataformSenac.domain.entities.Professor;
+import com.senac.ApiEduPlataformSenac.domain.entities.Usuario;
 import com.senac.ApiEduPlataformSenac.domain.repository.CursoRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.Authentication;
@@ -20,27 +21,47 @@ public class CursoService {
     @Autowired
     private ProfessorService professorService;
 
-    public List<CursoResponse> listarTodos(Authentication authentication) throws Exception {
-        Professor professorLogado = professorService.buscarProfessorLogadoEntidade(authentication);
+//    public List<CursoResponse> listarTodos(Authentication authentication) throws Exception {
+//        Professor professorLogado = professorService.buscarProfessorLogadoEntidade(authentication);
+//
+//        return cursoRepository.findAllByProfessorId(professorLogado.getId())
+//                .stream()
+//                .map(this::converterParaResponse)
+//                .toList();
+//    }
 
-        return cursoRepository.findAllByProfessorId(professorLogado.getId())
-                .stream()
+    public List<CursoResponse> listarTodos(Authentication authentication) throws Exception {
+        List<Curso> cursos;
+
+        if (usuarioEhAdmin(authentication)) {
+            cursos = cursoRepository.findAll();
+        } else {
+            Professor professor = professorService.buscarProfessorLogadoEntidade(authentication);
+            cursos = cursoRepository.findAllByProfessorId(professor.getId());
+        }
+
+        return cursos.stream()
                 .map(this::converterParaResponse)
                 .toList();
     }
 
+//    public CursoResponse buscarPorId(Long id, Authentication authentication) throws Exception {
+//        Professor professorLogado = professorService.buscarProfessorLogadoEntidade(authentication);
+//
+//        Curso curso = buscarCurso(id);
+//
+//        if (curso == null) {
+//            throw new Exception("CURSO_NAO_ENCONTRADO");
+//        }
+//
+//        if (!cursoPertenceAoProfessor(curso, professorLogado)) {
+//            throw new Exception("SEM_PERMISSAO");
+//        }
+//
+//        return converterParaResponse(curso);
+//    }
     public CursoResponse buscarPorId(Long id, Authentication authentication) throws Exception {
-        Professor professorLogado = professorService.buscarProfessorLogadoEntidade(authentication);
-
-        Curso curso = buscarCurso(id);
-
-        if (curso == null) {
-            throw new Exception("CURSO_NAO_ENCONTRADO");
-        }
-
-        if (!cursoPertenceAoProfessor(curso, professorLogado)) {
-            throw new Exception("SEM_PERMISSAO");
-        }
+        Curso curso = buscarCursoDoProfessor(id, authentication);
 
         return converterParaResponse(curso);
     }
@@ -101,14 +122,34 @@ public class CursoService {
         return cursoRepository.findById(id).orElse(null);
     }
 
-    public Curso buscarCursoDoProfessor(Long cursoId, Authentication authentication) throws Exception {
-        Professor professorLogado = professorService.buscarProfessorLogadoEntidade(authentication);
+//    public Curso buscarCursoDoProfessor(Long cursoId, Authentication authentication) throws Exception {
+//        Professor professorLogado = professorService.buscarProfessorLogadoEntidade(authentication);
+//
+//        Curso curso = buscarCurso(cursoId);
+//
+//        if (curso == null) {
+//            throw new Exception("CURSO_NAO_ENCONTRADO");
+//        }
+//
+//        if (!cursoPertenceAoProfessor(curso, professorLogado)) {
+//            throw new Exception("SEM_PERMISSAO");
+//        }
+//
+//        return curso;
+//    }
 
+    public Curso buscarCursoDoProfessor(Long cursoId, Authentication authentication) throws Exception {
         Curso curso = buscarCurso(cursoId);
 
         if (curso == null) {
             throw new Exception("CURSO_NAO_ENCONTRADO");
         }
+
+        if (usuarioEhAdmin(authentication)) {
+            return curso;
+        }
+
+        Professor professorLogado = professorService.buscarProfessorLogadoEntidade(authentication);
 
         if (!cursoPertenceAoProfessor(curso, professorLogado)) {
             throw new Exception("SEM_PERMISSAO");
@@ -123,6 +164,13 @@ public class CursoService {
         }
 
         return curso.getProfessor().getId().equals(professorLogado.getId());
+    }
+
+    private boolean usuarioEhAdmin(Authentication authentication) {
+        Usuario usuarioLogado = (Usuario) authentication.getPrincipal();
+
+        return usuarioLogado.getRole() != null
+                && usuarioLogado.getRole().toString().equals("ROLE_ADMIN");
     }
 
     private CursoResponse converterParaResponse(Curso curso) {

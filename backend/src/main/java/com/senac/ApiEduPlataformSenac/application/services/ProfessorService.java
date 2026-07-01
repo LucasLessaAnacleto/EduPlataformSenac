@@ -11,6 +11,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Optional;
 
 @Service
 public class ProfessorService {
@@ -18,19 +19,19 @@ public class ProfessorService {
     @Autowired
     private ProfessorRepository professorRepository;
 
-    public Professor buscarProfessorLogadoEntidade(Authentication authentication) {
-        try {
-            Usuario usuario = (Usuario) authentication.getPrincipal();
+    public Professor buscarProfessorLogadoEntidade(Authentication authentication) throws Exception {
+        Usuario usuarioLogado = (Usuario) authentication.getPrincipal();
 
-            return professorRepository.findByUsuarioId(usuario.getId())
-                    .orElseThrow(() -> new RuntimeException("Usuário logado não possui professor vinculado"));
+        Optional<Professor> professor = professorRepository.findByUsuarioId(usuarioLogado.getId());
 
-        } catch (Exception e) {
-            throw new RuntimeException(e);
+        if (professor.isEmpty()) {
+            throw new Exception("USUARIO_SEM_PROFESSOR");
         }
+
+        return professor.get();
     }
 
-    public ProfessorResponse buscarProfessorLogado(Authentication authentication) {
+    public ProfessorResponse buscarProfessorLogado(Authentication authentication) throws Exception {
         Professor professor = buscarProfessorLogadoEntidade(authentication);
         return new ProfessorResponse(
                 professor.getId(),
@@ -67,7 +68,7 @@ public class ProfessorService {
         );
     }
 
-    public ProfessorResponse atualizarProfessorLogado(Authentication authentication, ProfessorRequest professorRequest) {
+    public ProfessorResponse atualizarProfessorLogado(Authentication authentication, ProfessorRequest professorRequest) throws Exception {
         Professor professorBanco = buscarProfessorLogadoEntidade(authentication);
 
         professorBanco.setNome(professorRequest.nome());

@@ -29,6 +29,7 @@ public class CursoController {
             return ResponseEntity.ok(cursoService.listarTodos(authentication));
 
         } catch (Exception e) {
+            System.out.println(e);
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
         }
     }
