@@ -1,28 +1,41 @@
 'use client'
 
-import { useAuth } from "@/app/_context/AuthContext"
-import { Professor } from "@/app/types"
-import { api } from "@/app/utils/api"
+import Loading from "@/app/components/Loading"
+import { buscarProfessorLogado, atualizarProfessorLogado } from "@/app/services/professorService"
+import { Professor } from "@/app/types/professor"
 import Link from "next/link"
-import { useRouter } from "next/navigation"
 import { useEffect, useState } from "react"
+import { useSelector } from "react-redux"
+import { RootState } from "@/app/redux/store"
 
 export default function PerfilProfessor() {
-    const { usuario } = useAuth();
+    const usuarioLogado = useSelector((state: RootState) => state.auth.usuario)
+
     const [professor, setProfessor] = useState<Professor | null>(null)
-    const router = useRouter()
+    const [carregando, setCarregando] = useState(true)
+
+    const ehAdmin = usuarioLogado?.role === "ROLE_ADMIN"
+    const ehProfessor = usuarioLogado?.role === "ROLE_PROFESSOR"
 
     useEffect(() => {
-        fetchProfessor()
-    }, [])
+        if (ehProfessor) {
+            fetchProfessor()
+        } else {
+            setCarregando(false)
+        }
+    }, [usuarioLogado])
 
     const fetchProfessor = async () => {
         try {
-            const response = await api.get<Professor>("/professores/me")
-            setProfessor(response.data)
+            const professorDados = await buscarProfessorLogado()
+            setProfessor(professorDados)
+
         } catch (err) {
             console.error(err)
             alert("Erro ao carregar perfil")
+
+        } finally {
+            setCarregando(false)
         }
     }
 
@@ -33,37 +46,181 @@ export default function PerfilProfessor() {
         }))
     }
 
-    const handleSalvar = async (formData: FormData) => {
+    const handleSalvar = async () => {
         if (!professor) return
 
-        const senha = formData.get("senha")?.toString()
-
-        const response = await api.put(`/professores/${professor.id}`, {
-            nome: professor.nome,
-            email: professor.email,
-            biografia: professor.biografia,
-            senha: senha || undefined
-        })
-
-        if (response.status !== 200) {
-            alert("Erro ao atualizar perfil!")
+        if (!professor.nome || !professor.cpf || !professor.biografia) {
+            alert("Preencha todos os campos!")
             return
         }
 
-        alert("Perfil atualizado com sucesso!");
+        try {
+            const professorAtualizado = await atualizarProfessorLogado({
+                nome: professor.nome,
+                cpf: professor.cpf,
+                biografia: professor.biografia
+            })
 
+            setProfessor(professorAtualizado)
+
+            alert("Perfil atualizado com sucesso!")
+
+        } catch (error) {
+            console.error(error)
+            alert("Erro ao atualizar perfil!")
+        }
+    }
+
+    if (carregando) {
+        return (
+            <Loading message="Carregando perfil..." fullScreen />
+        )
+    }
+
+    if (ehAdmin) {
+        return (
+            <div className="space-y-8">
+
+                <div>
+                    <h1 className="text-2xl font-semibold text-white">
+                        Meu perfil
+                    </h1>
+
+                    <p className="text-sm text-zinc-400 mt-1">
+                        Informações do usuário administrador
+                    </p>
+                </div>
+
+                <div className="
+                    bg-zinc-900
+                    border border-zinc-800
+                    rounded-xl
+                    p-6 md:p-8
+                    space-y-8
+                ">
+
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+
+                        <div className="flex flex-col gap-2">
+                            <label className="text-sm text-zinc-400">
+                                Perfil
+                            </label>
+
+                            <input
+                                type="text"
+                                value="Administrador"
+                                disabled
+                                className="
+                                    bg-zinc-950
+                                    border border-zinc-800
+                                    rounded-lg
+                                    px-4 py-2.5
+                                    text-sm
+                                    text-zinc-400
+                                    outline-none
+                                    cursor-not-allowed
+                                    opacity-70
+                                "
+                            />
+                        </div>
+
+                        <div className="flex flex-col gap-2">
+                            <label className="text-sm text-zinc-400">
+                                E-mail
+                            </label>
+
+                            <input
+                                type="email"
+                                value={usuarioLogado?.email || ""}
+                                disabled
+                                className="
+                                    bg-zinc-950
+                                    border border-zinc-800
+                                    rounded-lg
+                                    px-4 py-2.5
+                                    text-sm
+                                    text-zinc-400
+                                    outline-none
+                                    cursor-not-allowed
+                                    opacity-70
+                                "
+                            />
+                        </div>
+
+                        <div className="flex flex-col gap-2">
+                            <label className="text-sm text-zinc-400">
+                                Status
+                            </label>
+
+                            <input
+                                type="text"
+                                value={usuarioLogado?.status || ""}
+                                disabled
+                                className="
+                                    bg-zinc-950
+                                    border border-zinc-800
+                                    rounded-lg
+                                    px-4 py-2.5
+                                    text-sm
+                                    text-zinc-400
+                                    outline-none
+                                    cursor-not-allowed
+                                    opacity-70
+                                "
+                            />
+                        </div>
+
+                    </div>
+
+                    <div className="border-t border-zinc-800 pt-6 flex items-center justify-between">
+
+                        <div className="text-sm text-zinc-500">
+                            ID #{usuarioLogado?.id}
+                        </div>
+
+                        <Link
+                            href="/home"
+                            className="
+                                px-4 py-2
+                                text-sm
+                                rounded-lg
+                                text-zinc-400
+                                hover:text-white
+                                hover:bg-zinc-800
+                                transition
+                            "
+                        >
+                            Voltar
+                        </Link>
+
+                    </div>
+
+                </div>
+
+            </div>
+        )
     }
 
     if (!professor) {
         return (
             <div className="p-6 text-zinc-400">
-                Carregando perfil...
+                Perfil não encontrado.
             </div>
         )
     }
 
     return (
         <form action={handleSalvar} className="space-y-8">
+
+            <div>
+                <h1 className="text-2xl font-semibold text-white">
+                    Meu perfil
+                </h1>
+
+                <p className="text-sm text-zinc-400 mt-1">
+                    Atualize suas informações de professor
+                </p>
+            </div>
 
             <div className="
                 bg-zinc-900
@@ -73,20 +230,8 @@ export default function PerfilProfessor() {
                 space-y-8
             ">
 
-                {/* HEADER */}
-                <div>
-                    <h2 className="text-lg font-semibold text-white">
-                        Meu perfil
-                    </h2>
-                    <p className="text-sm text-zinc-400 mt-1">
-                        Atualize suas informações pessoais
-                    </p>
-                </div>
-
-                {/* GRID */}
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
 
-                    {/* NOME */}
                     <div className="flex flex-col gap-2">
                         <label className="text-sm text-zinc-400">
                             Nome completo
@@ -95,13 +240,48 @@ export default function PerfilProfessor() {
                         <input
                             type="text"
                             value={professor.nome}
-                            onChange={(e) => handleChange('nome', e.target.value)}
-                            className="bg-zinc-950 border border-zinc-800 rounded-lg px-4 py-2.5 text-sm text-zinc-200 outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/30"
+                            onChange={(e) => handleChange("nome", e.target.value)}
+                            className="
+                                bg-zinc-950
+                                border border-zinc-800
+                                rounded-lg
+                                px-4 py-2.5
+                                text-sm
+                                text-zinc-200
+                                outline-none
+                                focus:border-blue-500
+                                focus:ring-2
+                                focus:ring-blue-500/30
+                            "
                             name="nome"
                         />
                     </div>
 
-                    {/* EMAIL */}
+                    <div className="flex flex-col gap-2">
+                        <label className="text-sm text-zinc-400">
+                            CPF
+                        </label>
+
+                        <input
+                            type="text"
+                            value={professor.cpf}
+                            onChange={(e) => handleChange("cpf", e.target.value)}
+                            className="
+                                bg-zinc-950
+                                border border-zinc-800
+                                rounded-lg
+                                px-4 py-2.5
+                                text-sm
+                                text-zinc-200
+                                outline-none
+                                focus:border-blue-500
+                                focus:ring-2
+                                focus:ring-blue-500/30
+                            "
+                            name="cpf"
+                        />
+                    </div>
+
                     <div className="flex flex-col gap-2">
                         <label className="text-sm text-zinc-400">
                             E-mail
@@ -109,14 +289,45 @@ export default function PerfilProfessor() {
 
                         <input
                             type="email"
-                            value={professor.email}
-                            onChange={(e) => handleChange('email', e.target.value)}
-                            className="bg-zinc-950 border border-zinc-800 rounded-lg px-4 py-2.5 text-sm text-zinc-200 outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/30"
-                            name="email"
+                            value={usuarioLogado?.email || ""}
+                            disabled
+                            className="
+                                bg-zinc-950
+                                border border-zinc-800
+                                rounded-lg
+                                px-4 py-2.5
+                                text-sm
+                                text-zinc-400
+                                outline-none
+                                cursor-not-allowed
+                                opacity-70
+                            "
                         />
                     </div>
 
-                    {/* BIOGRAFIA */}
+                    <div className="flex flex-col gap-2">
+                        <label className="text-sm text-zinc-400">
+                            Status
+                        </label>
+
+                        <input
+                            type="text"
+                            value={usuarioLogado?.status || ""}
+                            disabled
+                            className="
+                                bg-zinc-950
+                                border border-zinc-800
+                                rounded-lg
+                                px-4 py-2.5
+                                text-sm
+                                text-zinc-400
+                                outline-none
+                                cursor-not-allowed
+                                opacity-70
+                            "
+                        />
+                    </div>
+
                     <div className="flex flex-col gap-2 md:col-span-2">
                         <label className="text-sm text-zinc-400">
                             Biografia
@@ -124,30 +335,27 @@ export default function PerfilProfessor() {
 
                         <textarea
                             value={professor.biografia || ""}
-                            onChange={(e) => handleChange('biografia', e.target.value)}
+                            onChange={(e) => handleChange("biografia", e.target.value)}
                             rows={4}
-                            className="bg-zinc-950 border border-zinc-800 rounded-lg px-4 py-2.5 text-sm text-zinc-200 outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/30 resize-none"
+                            className="
+                                bg-zinc-950
+                                border border-zinc-800
+                                rounded-lg
+                                px-4 py-2.5
+                                text-sm
+                                text-zinc-200
+                                outline-none
+                                focus:border-blue-500
+                                focus:ring-2
+                                focus:ring-blue-500/30
+                                resize-none
+                            "
                             name="biografia"
-                        />
-                    </div>
-
-                    {/* SENHA */}
-                    <div className="flex flex-col gap-2 md:col-span-2">
-                        <label className="text-sm text-zinc-400">
-                            Nova senha
-                        </label>
-
-                        <input
-                            type="password"
-                            placeholder="Deixe em branco para não alterar"
-                            className="bg-zinc-950 border border-zinc-800 rounded-lg px-4 py-2.5 text-sm text-zinc-200 outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/30"
-                            name="senha"
                         />
                     </div>
 
                 </div>
 
-                {/* FOOTER */}
                 <div className="border-t border-zinc-800 pt-6 flex items-center justify-between">
 
                     <div className="text-sm text-zinc-500">

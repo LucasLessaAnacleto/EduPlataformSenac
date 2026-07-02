@@ -101,9 +101,9 @@ export default function LoginPage() {
                     <div className="flex flex-col gap-3 pt-2">
                         <Button type="submit" className="py-2.5">Entrar</Button>
 
-                        <Link href="/nova-conta" className="text-center border border-zinc-700 hover:border-zinc-500 text-zinc-300 text-sm py-2.5 rounded-lg transition">
-                            Criar conta
-                        </Link>
+                        {/* <Link href="/nova-conta" className="text-center border border-zinc-700 hover:border-zinc-500 text-zinc-300 text-sm py-2.5 rounded-lg transition"> */}
+                            {/* Criar conta */}
+                        {/* </Link> */}
                     </div>
                 </form>
             </div>

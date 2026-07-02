@@ -2,15 +2,17 @@
 
 import Link from "next/link"
 import { usePathname, useRouter } from "next/navigation"
-import { useDispatch } from "react-redux"
-import { AppDispatch } from "../redux/store"
+import { useDispatch, useSelector } from "react-redux"
+import { AppDispatch, RootState } from "../redux/store"
 import { logout } from "../redux/slices/authSlice"
-import { BookOpen, User, LogOut } from "lucide-react"
+import { BookOpen, User, LogOut, Users } from "lucide-react"
 
 export default function Sidebar() {
     const dispatch = useDispatch<AppDispatch>()
     const router = useRouter()
     const pathname = usePathname()
+
+    const usuario = useSelector((state: RootState) => state.auth.usuario);
 
     function handleLogout() {
         dispatch(logout())
@@ -29,6 +31,14 @@ export default function Sidebar() {
             icon: User
         }
     ]
+
+    if (usuario?.role === "ROLE_ADMIN") {
+        menu.push({
+            name: "Usuários",
+            href: "/usuarios",
+            icon: Users
+        })
+    }
 
     return (
         <aside className="w-64 bg-zinc-900 border-r border-zinc-800 flex flex-col">

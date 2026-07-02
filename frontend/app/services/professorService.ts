@@ -1,6 +1,17 @@
 import { Professor, ProfessorRequest } from "../types/professor"
 import api from "./api"
 
+export async function buscarProfessorPorUsuarioId(usuarioId: number): Promise<Professor> {
+    return (await api.get<Professor>("/professores/usuario/" + usuarioId)).data
+}
+
+export async function atualizarProfessorPorUsuarioId(
+    usuarioId: number,
+    professor: ProfessorRequest
+): Promise<Professor> {
+    return (await api.put<Professor>("/professores/usuario/" + usuarioId, professor)).data
+}
+
 export async function buscarListaProfessores(): Promise<Professor[]> {
     const dados = await api.get<Professor[]>("/professores")
 

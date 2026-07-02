@@ -65,4 +65,55 @@ public class ProfessorController {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
         }
     }
+
+    @GetMapping("/usuario/{usuarioId}")
+    public ResponseEntity<ProfessorResponse> buscarProfessorPorUsuarioId(
+            @PathVariable Long usuarioId,
+            Authentication authentication
+    ) {
+        try {
+            ProfessorResponse professorResponse = professorService.buscarProfessorPorUsuarioId(usuarioId, authentication);
+
+            return ResponseEntity.ok(professorResponse);
+
+        } catch (Exception e) {
+            if (e.getMessage().equals("SEM_PERMISSAO")) {
+                return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+            }
+
+            if (e.getMessage().equals("PROFESSOR_NAO_ENCONTRADO")) {
+                return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+            }
+
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
+        }
+    }
+
+    @PutMapping("/usuario/{usuarioId}")
+    public ResponseEntity<ProfessorResponse> atualizarProfessorPorUsuarioId(
+            @PathVariable Long usuarioId,
+            @RequestBody ProfessorRequest professorRequest,
+            Authentication authentication
+    ) {
+        try {
+            ProfessorResponse professorResponse = professorService.atualizarProfessorPorUsuarioId(
+                    usuarioId,
+                    professorRequest,
+                    authentication
+            );
+
+            return ResponseEntity.ok(professorResponse);
+
+        } catch (Exception e) {
+            if (e.getMessage().equals("SEM_PERMISSAO")) {
+                return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+            }
+
+            if (e.getMessage().equals("PROFESSOR_NAO_ENCONTRADO")) {
+                return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+            }
+
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
+        }
+    }
 }

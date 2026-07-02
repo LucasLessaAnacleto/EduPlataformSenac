@@ -95,4 +95,61 @@ public class ProfessorService {
 
         return professorRepository.save(professor);
     }
+
+    public ProfessorResponse buscarProfessorPorUsuarioId(Long usuarioId, Authentication authentication) throws Exception {
+        if (!usuarioEhAdmin(authentication)) {
+            throw new Exception("SEM_PERMISSAO");
+        }
+
+        Optional<Professor> professorOptional = professorRepository.findByUsuarioId(usuarioId);
+
+        if (professorOptional.isEmpty()) {
+            throw new Exception("PROFESSOR_NAO_ENCONTRADO");
+        }
+
+        return converterParaResponse(professorOptional.get());
+    }
+
+    public ProfessorResponse atualizarProfessorPorUsuarioId(
+            Long usuarioId,
+            ProfessorRequest professorRequest,
+            Authentication authentication
+    ) throws Exception {
+
+        if (!usuarioEhAdmin(authentication)) {
+            throw new Exception("SEM_PERMISSAO");
+        }
+
+        Optional<Professor> professorOptional = professorRepository.findByUsuarioId(usuarioId);
+
+        if (professorOptional.isEmpty()) {
+            throw new Exception("PROFESSOR_NAO_ENCONTRADO");
+        }
+
+        Professor professor = professorOptional.get();
+
+        professor.setNome(professorRequest.nome());
+        professor.setCpf(new CPF(professorRequest.cpf()));
+        professor.setBiografia(professorRequest.biografia());
+
+        Professor professorAtualizado = professorRepository.save(professor);
+
+        return converterParaResponse(professorAtualizado);
+    }
+
+    private boolean usuarioEhAdmin(Authentication authentication) {
+        Usuario usuarioLogado = (Usuario) authentication.getPrincipal();
+
+        return usuarioLogado.getRole() != null
+                && usuarioLogado.getRole().toString().equals("ROLE_ADMIN");
+    }
+
+    private ProfessorResponse converterParaResponse(Professor professor) {
+        return new ProfessorResponse(
+                professor.getId(),
+                professor.getNome(),
+                professor.getCpf().toString(),
+                professor.getBiografia()
+        );
+    }
 }
