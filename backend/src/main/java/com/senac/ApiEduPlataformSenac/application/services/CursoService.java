@@ -21,15 +21,6 @@ public class CursoService {
     @Autowired
     private ProfessorService professorService;
 
-//    public List<CursoResponse> listarTodos(Authentication authentication) throws Exception {
-//        Professor professorLogado = professorService.buscarProfessorLogadoEntidade(authentication);
-//
-//        return cursoRepository.findAllByProfessorId(professorLogado.getId())
-//                .stream()
-//                .map(this::converterParaResponse)
-//                .toList();
-//    }
-
     public List<CursoResponse> listarTodos(Authentication authentication) throws Exception {
         List<Curso> cursos;
 
@@ -45,21 +36,6 @@ public class CursoService {
                 .toList();
     }
 
-//    public CursoResponse buscarPorId(Long id, Authentication authentication) throws Exception {
-//        Professor professorLogado = professorService.buscarProfessorLogadoEntidade(authentication);
-//
-//        Curso curso = buscarCurso(id);
-//
-//        if (curso == null) {
-//            throw new Exception("CURSO_NAO_ENCONTRADO");
-//        }
-//
-//        if (!cursoPertenceAoProfessor(curso, professorLogado)) {
-//            throw new Exception("SEM_PERMISSAO");
-//        }
-//
-//        return converterParaResponse(curso);
-//    }
     public CursoResponse buscarPorId(Long id, Authentication authentication) throws Exception {
         Curso curso = buscarCursoDoProfessor(id, authentication);
 
@@ -121,22 +97,6 @@ public class CursoService {
     private Curso buscarCurso(Long id) {
         return cursoRepository.findById(id).orElse(null);
     }
-
-//    public Curso buscarCursoDoProfessor(Long cursoId, Authentication authentication) throws Exception {
-//        Professor professorLogado = professorService.buscarProfessorLogadoEntidade(authentication);
-//
-//        Curso curso = buscarCurso(cursoId);
-//
-//        if (curso == null) {
-//            throw new Exception("CURSO_NAO_ENCONTRADO");
-//        }
-//
-//        if (!cursoPertenceAoProfessor(curso, professorLogado)) {
-//            throw new Exception("SEM_PERMISSAO");
-//        }
-//
-//        return curso;
-//    }
 
     public Curso buscarCursoDoProfessor(Long cursoId, Authentication authentication) throws Exception {
         Curso curso = buscarCurso(cursoId);

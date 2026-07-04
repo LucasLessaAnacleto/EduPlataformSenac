@@ -50,11 +50,15 @@ public class MatriculaService {
 
         Matricula matriculaSalva = matriculaRepository.save(matricula);
 
-        envioDeEmail.enviarBoasVindas(
-                matriculaSalva.getEmailAluno().toString(),
-                matriculaSalva.getNomeAluno(),
-                curso.getTitulo()
-        );
+        try {
+            envioDeEmail.enviarBoasVindas(
+                    matriculaSalva.getEmailAluno().toString(),
+                    matriculaSalva.getNomeAluno(),
+                    curso.getTitulo()
+            );
+        } catch (Exception e) {
+            System.out.println("Não foi possível enviar o e-mail de boas-vindas: " + e.getMessage());
+        }
 
         return matriculaSalva.getId();
     }
